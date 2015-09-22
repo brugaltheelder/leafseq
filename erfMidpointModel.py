@@ -31,7 +31,7 @@ class erfMidModel:
                                                   runData.objParams[
                                                       1]  # shift for sin obj, scacling factor for erf, sin scaling factor
         self.minAperWidth, self.maxAperWidth, self.aperCenterOffset = runData.minAperWidth, runData.maxAperWidth, runData.aperCenterOffset  # min/max bounds for aper width, aper center offset from edges
-
+        self.objCalls = 0
         # Initialize values
         self.numApproxPoints = int(self.width / self.resolution + 1)  # number of approximation points
         self.alphas = np.copy(runData.alphas)  # copy over objective function weights
@@ -49,7 +49,11 @@ class erfMidModel:
         self.varArray = np.zeros(3 * self.K)
 
         #todo calculate solution vector, refactor to just query that vector
-
+        # check if there is a seed target fluence, if not, default to sin
+        if trueFluenceVector != None and len(self.approxPoints) == len(trueFluenceVector):
+            self.fTarget = trueFluenceVector
+        else:
+            self.fTarget = np.array(np.sin(self.sinScalar * self.approxPoints) + self.sinGap)
 
 
         # initialize solution vector
@@ -123,7 +127,7 @@ class erfMidModel:
     def objGradEval(self, x):
 
         # calculate original fluence f, initialize  g
-        f = np.array(np.sin(self.sinScalar * self.approxPoints) + self.sinGap)
+
         g = np.zeros(self.numApproxPoints)
 
         # for each approximation point, calculate the sequenced fluence
@@ -136,11 +140,12 @@ class erfMidModel:
             idx = x[self.K:2 * self.K] < self.approxPoints[i]
             g[i] += np.sum(x[0:self.K][idx] * (sps.erfc(
                 (self.approxPoints[i] - (x[self.K:2 * self.K][idx] + x[2 * self.K:3 * self.K][idx])) / self.sigma)))
-        diff = f - g  # difference in original and sequenced fluence
+        diff = self.fTarget - g  # difference in original and sequenced fluence
 
         # plot if necessary
-        if self.realTimePlotting:
+        if self.realTimePlotting and self.objCalls % 5 == 0:
             self.plotSolution(True, x)
+        self.objCalls += 1
         return self.objEval(diff), self.gradEval(x, diff)
 
     # takes the sum of the squares for the objective function evaluation
@@ -183,7 +188,7 @@ class erfMidModel:
     def solve(self):
         self.res = spo.minimize(self.objGradEval, x0=self.varArray.copy(), method='L-BFGS-B', jac=True,
                                 bounds=self.bounds,
-                                options={'ftol': 1e-3, 'disp': 10})
+                                options={'ftol': 1e-4, 'disp': 10})
         self.finalX = self.res['x']
         self.obj = self.res['fun']
 
@@ -196,13 +201,14 @@ class erfMidModel:
             plt.clf()
             self.finalX = intermediateX
         else:
+            plt.figure(0)
             plt.close()
             plt.figure(1)
             plt.ioff()
 
         # Objective function evaluation and plotting
-        yfunc = np.array(np.sin(self.sinScalar * self.approxPoints) + self.sinGap)
-        plt.plot(self.approxPoints, yfunc, 'r')
+
+        plt.plot(self.approxPoints, self.fTarget, 'r')
 
         # Sets coherent limits to plot
         plt.ylim(0, 1.2 * max(np.max(self.finalX[0:self.K]), self.sinGap + 1))
