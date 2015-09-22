@@ -1,6 +1,7 @@
 __author__ = 's162195'
 
 from erfMidpointModel import *
+from dataObj import *
 import math
 
 res = 0.01

@@ -5,17 +5,7 @@ import scipy.optimize as spo
 import scipy.special as sps
 from scipy import io
 import matplotlib.pyplot as plt
-
-
-class dataObj():
-    def __init__(self, objParams, res, K, sigma, width, alphas, aperParams):
-        self.objParams = objParams  # list of objective parameters [ci, bi for sin]
-        self.resolution = res  # resolution of funciton approximation
-        self.numAper = K  # number of apertures
-        self.sigma = sigma  # Scalar to make erf steeper
-        self.width = width
-        self.alphas = alphas
-        self.minAperWidth, self.maxAperWidth, self.aperCenterOffset = aperParams
+from dataObj import *
 
 
 class erfMidModel:
