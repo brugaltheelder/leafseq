@@ -10,7 +10,8 @@ from dataObj import *
 
 class erfMidModel:
     # class initialization
-    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving = False, startingSolutionVector = None, trueFluenceVector = None, initializationStringAndParams = None):
+    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, startingSolutionVector=None,
+                 trueFluenceVector=None, initializationStringAndParams=None):
 
         # Read in parameters
         assert (isinstance(runData, dataObj))
@@ -37,7 +38,7 @@ class erfMidModel:
         # allocate solution vector
         self.varArray = np.zeros(3 * self.K)
 
-        #todo calculate solution vector, refactor to just query that vector
+
         # check if there is a seed target fluence, if not, default to sin
         if trueFluenceVector != None and len(self.approxPoints) == len(trueFluenceVector):
             self.fTarget = trueFluenceVector
@@ -46,13 +47,13 @@ class erfMidModel:
 
 
         # initialize solution vector
-        if trueFluenceVector!=None and len(self.varArray) == len(trueFluenceVector):
+        if trueFluenceVector != None and len(self.varArray) == len(trueFluenceVector):
             self.varArray = np.copy(trueFluenceVector)
-        elif initializationStringAndParams[0]== 'unifcent':
+        elif initializationStringAndParams[0] == 'unifcent':
             self.initializeVarsUniformCenter()
-        elif initializationStringAndParams[0]== 'unifwidth':
+        elif initializationStringAndParams[0] == 'unifwidth':
             self.initializeVarsUniformWidth()
-        elif initializationStringAndParams[0]== 'unifmixed':
+        elif initializationStringAndParams[0] == 'unifmixed':
             self.initializeVarsUniformMixed(initializationStringAndParams[1])
         else:
             self.initializeVarsUniformMixed(2)
@@ -233,7 +234,7 @@ class erfMidModel:
         if ongoingfig:
             plt.draw()
             if self.realTimePlotSaving:
-                plt.savefig('iterPlotOut_'+str(self.figCounter)+'_.png')
+                plt.savefig('iterPlotOut_' + str(self.figCounter) + '_.png')
                 self.figCounter += 1
         else:
             plt.show()
@@ -247,5 +248,3 @@ class erfMidModel:
                               'alphas': self.alphas, 'maxAperWidth': self.maxAperWidth,
                               'minAperWidth': self.minAperWidth,
                               'aperCenterOffset': self.aperCenterOffset})
-
-
