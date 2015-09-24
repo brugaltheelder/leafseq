@@ -10,26 +10,58 @@ from dataObj import *
 
 
 class rmpSolution():
-    def __init__(self, numApproxPoints):
+    def __init__(self, numApproxPoints, alphas, f):
+
+        #initialize objective elements (f, alphas)
+        self.f = np.copy(f)
+        self.alphas = np.copy(alphas)
         # initialize y vector (intensities)
-
+        self.y = np.array([])
+        self.nApprox = numApproxPoints
         # initiailze D sparse matrix of dimension (0,num points)
-
+        self.D = spsparse.csc_matrix((self.nApprox,0))
         # initialize solution D vector
-        pass
+        self.g = np.zeros(self.nApprox)
+        self.lVec = []
+        self.rVec = []
 
-    def calcObjGrad(self,x):
-        pass
 
-    def evalGrad(self, diff=None):
+    def calcObjGrad(self,y):
+        self.g = self.D.dot(y)
+        diff = self.f-self.g
+        return self.evalObj(y, diff=diff), self.evalGrad(y, diff=diff)
+
+    def evalGrad(self, y, diff=None):
         # if diff==None, then calc diff, otherwise return gradient
-        pass
+        if diff==None:
+            self.g = self.D.dot(y)
+            diff = self.f-self.g
+        return -2 * self.alphas * diff
 
-    def evalObj(self, diff=None):
+    def evalObj(self,y, diff=None):
         # if diff==None, then calc diff, otherwise return objective
-        pass
+        if diff==None:
+            self.g = self.D.dot(y)
+            diff = self.f-self.g
+        return np.sum(self.alphas * (diff**2))
+
+
+    def solvePP(self, y):
+        # calc gradient
+
+        # do search
+
+        # get best row
+
+        # add aperture to model
 
     def addAper(self, l,r):
+        # calculate row of D, add to sparse matrix
+
+        # generate y-value for y-vector
+
+        # save l and r positions
+
         pass
 
     def solveRMP(self):

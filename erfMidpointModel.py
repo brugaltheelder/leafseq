@@ -140,7 +140,7 @@ class erfMidModel:
 
     # takes the sum of the squares for the objective function evaluation
     def objEval(self, diff):
-        return np.sum(diff ** 2)
+        return np.sum(self.alphas * (diff ** 2))
 
     # calculates the gradient
     def gradEval(self, x, diff):
