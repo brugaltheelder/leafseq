@@ -120,7 +120,7 @@ class erfMidModel:
         # calculate original fluence f, initialize  g
 
         g = np.zeros(self.numApproxPoints)
-
+        #todo flip the execution on this for loop if possible (using sum of two functions)
         # for each approximation point, calculate the sequenced fluence
         for i in xrange(self.numApproxPoints):
             # case with approx[i] <= m_k (center to right of approx point)

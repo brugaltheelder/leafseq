@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from dataObj import *
 
 
-class cgSolver():
+class cgSolver:
     def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None):
         # def __init__(self, numApproxPoints, alphas, f, sigma, approxPoints):
         self.realTimePlotting, self.realTimePlotSaving = realTimePlotting, realTimePlotSaving
@@ -28,7 +28,7 @@ class cgSolver():
 
 
         # check if there is a seed target fluence, if not, default to sin
-        if trueFluenceVector != None and len(self.approxPoints) == len(trueFluenceVector):
+        if trueFluenceVector is not None and len(self.approxPoints) == len(trueFluenceVector):
             self.f = trueFluenceVector
         else:
             self.f = np.array(np.sin(self.sinScalar * self.approxPoints) + self.sinGap)
@@ -84,7 +84,7 @@ class cgSolver():
         maxSoFar, maxEndingHere, lE, rE = 0, 0, 0, 0
         for i in range(self.nApprox):
             maxEndingHere += grad[i]
-            if maxEndingHere > 0:
+            if maxEndingHere >= 0:
                 maxEndingHere, lE, rE = 0, i + 1, i + 1
             if maxSoFar > maxEndingHere:
                 maxSoFar, rE = maxEndingHere, i + 1
