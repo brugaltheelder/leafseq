@@ -17,19 +17,23 @@ alphas = np.ones(int(width / res + 1))
 
 
 
-def runerf(data, initParams,RTplot = True, RTplotsaving = False):
-    mod = erfMidModel(dat, realTimePlotting=True, realTimePlotSaving=False, initializationStringAndParams=['unifmixed', 2])
+def runerf(data, initParams,RTplot = True, RTplotsaving = False, startVec = None):
+    mod = erfMidModel(dat, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving, initializationStringAndParams=initParams, startingSolutionVector=startVec)
     mod.solve()
     mod.plotSolution()
     mod.output('testout.mat')
 
 def runcg(data, RTplot = False, RTplotsaving = False,  trueF = None):
-    mod = cgSolver(data)
+    mod = cgSolver(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving, trueFluenceVector= trueF)
     mod.solve(data.numAper)
+    mod.printSolution()
+    return mod.getErfInput()
+
 
 
 
 
 dat = dataObj([c, b], res, numAper, sigma, width, alphas, [2. / width, width / 2., 1. / width])
 
-runcg(dat)
+runerf(dat, ['unifmixed', 2], RTplot=True)
+runcg(dat, RTplot=False)

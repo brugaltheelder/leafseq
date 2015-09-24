@@ -42,6 +42,13 @@ class cgSolver():
         self.lVec = []
         self.rVec = []
         self.Dtolerance = 0.0001
+                # start ongoing graph if necessary
+        if (self.realTimePlotting):
+            plt.figure(0)
+            self.figCounter = 0
+            plt.ion()
+            plt.show()
+
 
     def calcObjGrad(self, y):
         self.g = self.D.dot(y)
@@ -68,6 +75,8 @@ class cgSolver():
     def solvePP(self, y):
         # calc gradient
         grad = self.evalGrad(y)
+        print grad
+
 
         # do search
         # helper variables
@@ -78,23 +87,22 @@ class cgSolver():
                 maxEndingHere, lE, rE = 0, i + 1, i + 1
             if maxSoFar > maxEndingHere:
                 maxSoFar, rE = maxEndingHere, i + 1
+                lBest, rBest = lE, rE
         # add aperture to model
-        self.addAper(lE, rE)  # rE is non-inclusive
+        return self.addAper(lBest, rBest)  # rE is non-inclusive
 
     def solve(self, aperMax):
         self.aperMax = aperMax
         while np.size(self.y) < self.aperMax:
-            self.solvePP(self.y)
+            lPos,rPos = self.solvePP(self.y)
             self.solveRMP()
-            print 'Aperures {} of {} added, Obj: {}'.format(str(np.size(self.y)), str(self.aperMax), str(self.obj))
+            print 'Aperures {} of {} added, lPos: {}, rPos: {}, Obj: {}'.format(str(np.size(self.y)), str(self.aperMax), lPos, rPos,str(self.obj))
 
     def addAper(self, l, r):
-        # todo addAper
         # calculate col of D, add to sparse matrix using error function...make midpoint then write out function...truncate at very small
         # calc Dcol along entire axis, then truncate
         Dcol = np.zeros(self.nApprox)
         midpoint = self.approxPoints[l] + 1.0 * (self.approxPoints[(r - 1)] - self.approxPoints[l]) / 2.
-
         idx = self.approxPoints <= midpoint
         Dcol[idx] += 1 + sps.erf((self.approxPoints[idx] - self.approxPoints[l]) / self.sigma)
         idx = self.approxPoints > midpoint
@@ -111,8 +119,9 @@ class cgSolver():
         self.y = np.resize(self.y, (1, np.size(self.y) + 1))
 
         # save l and r positions
-        self.lVec.append(l)
-        self.rVec.append(r - 1)
+        self.lVec.append(self.approxPoints[l])
+        self.rVec.append(self.approxPoints[r - 1])
+        return self.approxPoints[l], self.approxPoints[r - 1]
 
     def solveRMP(self):
 
@@ -122,6 +131,46 @@ class cgSolver():
         self.y = self.res['x']
         self.obj = self.res['fun']
 
-    def printSolution(self):
-        # todo write print out funciton
-        pass
+
+    def getErfInput(self):
+        return None
+
+
+    def printSolution(self, ongoingfig=False, intermediateY=None):
+        # plot main function
+
+        if ongoingfig:
+            plt.figure(0)
+            plt.clf()
+            yVec = np.copy(intermediateY)
+        else:
+            plt.figure(0)
+            plt.close()
+            plt.figure(1)
+            plt.ioff()
+            yVec = np.copy(self.y)
+
+        # Objective function evaluation and plotting
+
+        plt.plot(self.approxPoints, self.f, 'r')
+
+        # Sets coherent limits to plot
+        plt.ylim(0, 1.2 * max(np.max(yVec), self.sinGap + 1))
+        plt.xlim(0, self.width)
+
+        # plots total sequenced fluence
+        g = self.D.dot(yVec)
+        plt.plot(self.approxPoints, g, 'g')
+
+        # plots each individual aperture
+        for k in range(np.size(yVec)):
+            # plot left error function up to center
+            plt.plot(self.approxPoints, yVec[k] * self.D.getcol(k).todense(), 'b')
+            # updates figure
+        if ongoingfig:
+            plt.draw()
+            if self.realTimePlotSaving:
+                plt.savefig('iterPlotOut_' + str(self.figCounter) + '_.png')
+                self.figCounter += 1
+        else:
+            plt.show()
