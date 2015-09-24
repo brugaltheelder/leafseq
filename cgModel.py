@@ -17,6 +17,7 @@ class cgSolver():
         self.sinGap, self.sigma, self.sinScalar = 1.0 * runData.objParams[0], 1.0 * runData.sigma, 1.0 * \
                                                   runData.objParams[
                                                       1]  # shift for sin obj, scacling factor for erf, sin scaling factor
+        self.runTag = runData.runTag
         self.objCalls = 0
         # Initialize values
         self.nApprox = int(self.width / self.resolution + 1)  # number of approximation points
@@ -39,12 +40,12 @@ class cgSolver():
         self.D = spsparse.csc_matrix((self.nApprox, 0))
         # initialize solution D vector
         self.g = np.zeros(self.nApprox)
-        self.lVec = []
-        self.rVec = []
+        self.lVec = np.array([])
+        self.rVec = np.array([])
         self.Dtolerance = 0.0001
                 # start ongoing graph if necessary
         if (self.realTimePlotting):
-            plt.figure(0)
+            plt.figure(2)
             self.figCounter = 0
             plt.ion()
             plt.show()
@@ -119,8 +120,9 @@ class cgSolver():
         self.y = np.resize(self.y, (1, np.size(self.y) + 1))
 
         # save l and r positions
-        self.lVec.append(self.approxPoints[l])
-        self.rVec.append(self.approxPoints[r - 1])
+
+        self.lVec = np.append(self.lVec, self.approxPoints[l])
+        self.rVec = np.append(self.rVec, self.approxPoints[r-1])
         return self.approxPoints[l], self.approxPoints[r - 1]
 
     def solveRMP(self):
@@ -133,20 +135,36 @@ class cgSolver():
 
 
     def getErfInput(self):
-        return None
+        # initialize return vector
+        K = np.size(self.y)
+        erfInputVector = np.zeros(3*K)
+        # populate intensities
+        erfInputVector[0:K] = np.copy(self.y)
+        # populate centers
+        erfInputVector[K:2*K] = self.lVec + 1./2.*(self.rVec - self.lVec)
+        # populate widths
+        erfInputVector[2*K:3*K] = 1./2.*(self.rVec - self.lVec)
 
+        return erfInputVector
 
-    def printSolution(self, ongoingfig=False, intermediateY=None):
+    def output(self, filename):
+        io.savemat(self.runTag + '_' + filename, {'y': self.y, 'l': self.lVec,
+                              'r': self.rVec, 'obj': self.obj,
+                              'sinGap': self.sinGap, 'K': self.K, 'width': self.width,
+                              'numApprox': self.nApprox, 'sinScalar': self.sinScalar, 'sigma': self.sigma,
+                              'alphas': self.alphas})
+
+    def printSolution(self, ongoingfig=False, intermediateY=None, finalShow = False):
         # plot main function
 
         if ongoingfig:
-            plt.figure(0)
+            plt.figure(2)
             plt.clf()
             yVec = np.copy(intermediateY)
         else:
-            plt.figure(0)
+            plt.figure(2)
             plt.close()
-            plt.figure(1)
+            plt.figure(3)
             plt.ioff()
             yVec = np.copy(self.y)
 
@@ -170,7 +188,14 @@ class cgSolver():
         if ongoingfig:
             plt.draw()
             if self.realTimePlotSaving:
-                plt.savefig('iterPlotOut_' + str(self.figCounter) + '_.png')
+                plt.savefig('CGiterPlotOut_' + str(self.figCounter) + '_.png')
                 self.figCounter += 1
         else:
-            plt.show()
+            plt.title('Method: CG, obj: '+str(self.obj) + ', nAper: ' + str(np.size(self.y)))
+            plt.xlabel('Position along MLC opening')
+            plt.ylabel('Fluence')
+            plt.savefig(self.runTag + '_CGfinalPlotOut.png')
+            if finalShow:
+                plt.show()
+            else:
+                plt.show(block = False)

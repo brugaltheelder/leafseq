@@ -21,6 +21,7 @@ class erfMidModel:
                                                   runData.objParams[
                                                       1]  # shift for sin obj, scacling factor for erf, sin scaling factor
         self.minAperWidth, self.maxAperWidth, self.aperCenterOffset = runData.minAperWidth, runData.maxAperWidth, runData.aperCenterOffset  # min/max bounds for aper width, aper center offset from edges
+        self.runTag = runData.runTag
         self.objCalls = 0
         # Initialize values
         self.numApproxPoints = int(self.width / self.resolution + 1)  # number of approximation points
@@ -35,7 +36,7 @@ class erfMidModel:
                                                   in range(self.K)] + [(self.minAperWidth, self.maxAperWidth) for i in
                                                                        range(self.K)])
 
-        # allocate solution vector
+        # allocate solution vector - [intensities, centers, widths]
         self.varArray = np.zeros(3 * self.K)
 
 
@@ -47,8 +48,8 @@ class erfMidModel:
 
 
         # initialize solution vector
-        if trueFluenceVector != None and len(self.varArray) == len(trueFluenceVector):
-            self.varArray = np.copy(trueFluenceVector)
+        if startingSolutionVector is not None and len(self.varArray) == len(startingSolutionVector):
+            self.varArray = np.copy(startingSolutionVector)
         elif initializationStringAndParams[0] == 'unifcent':
             self.initializeVarsUniformCenter()
         elif initializationStringAndParams[0] == 'unifwidth':
@@ -183,7 +184,7 @@ class erfMidModel:
         self.obj = self.res['fun']
 
     # plotter (can handle a single ongoing plot (0) or the single final plot (1))
-    def plotSolution(self, ongoingfig=False, intermediateX=None):
+    def plotSolution(self, ongoingfig=False, intermediateX=None, finalShow = False):
         # plot main function
 
         if ongoingfig:
@@ -234,15 +235,23 @@ class erfMidModel:
         if ongoingfig:
             plt.draw()
             if self.realTimePlotSaving:
-                plt.savefig('iterPlotOut_' + str(self.figCounter) + '_.png')
+                plt.savefig(self.runTag + '_ERFiterPlotOut_' + str(self.figCounter) + '.png')
                 self.figCounter += 1
         else:
-            plt.show()
+            plt.title('Method: ERF, obj: '+str(self.obj) + ', nAper: ' + str(self.K))
+            plt.xlabel('Position along MLC opening')
+            plt.ylabel('Fluence')
+            plt.savefig(self.runTag + '_ERFfinalPlotOut.png')
+            if finalShow:
+                plt.show()
+            else:
+                plt.show(block = False)
+
 
     # outputs values to a .mat file incase of MATLAB integration
     def output(self, filename):
-        io.savemat(filename, {'y': self.finalX[0:self.K], 'l': self.finalX[self.K:2 * self.K],
-                              'r': self.finalX[2 * self.K:3 * self.K], 'obj': self.obj,
+        io.savemat(self.runTag + '_' + filename, {'y': self.finalX[0:self.K], 'm': self.finalX[self.K:2 * self.K],
+                              'a': self.finalX[2 * self.K:3 * self.K], 'obj': self.obj,
                               'sinGap': self.sinGap, 'K': self.K, 'width': self.width,
                               'numApprox': self.numApproxPoints, 'sinScalar': self.sinScalar, 'sigma': self.sigma,
                               'alphas': self.alphas, 'maxAperWidth': self.maxAperWidth,
