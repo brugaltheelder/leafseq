@@ -30,8 +30,8 @@ class functionGetter:
     def sinFunction(self, a, b):
         return np.sin(b * self.approxPoints) + a
 
-    def functionPlotter(self, f, dimr, dimc, pos, blockVar= True):
+    def functionPlotter(self, f, dimr, dimc, pos, blockVar= True, color = 'b'):
         ax = self.fig.add_subplot(int(str(dimr) + str(dimc) + str(pos)))
         ax.set_ylim(0, 1.2 * np.max(f))
-        ax.plot(self.approxPoints, f)
+        ax.plot(self.approxPoints, f, color)
         plt.show(block = blockVar)
