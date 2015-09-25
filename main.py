@@ -36,12 +36,12 @@ a = np.array([width/3, width/6])
 # erfInputVec = np.copy(runcg(dat, RTplot=False))
 # runerf(dat, ['unifmixed', 2], RTplot=False, startVec=erfInputVec, finalShow=True)
 
-fErfVec = fGetter.erfSum(y,m,a,sigma, truncate=0.01)
-fGetter.functionPlotter(fErfVec,1,1,1, color = 'r')
-#erfInputVec = np.zeros(3*dat.numAper)
-#erfInputVec = np.copy(runcg(dat, RTplot=False, trueF=fErfVec))
+fErfVec = fGetter.erfSum(y,m,a,sigma, truncate=0.0)
+#fGetter.functionPlotter(fErfVec,1,1,1, color = 'r')
+erfInputVec = np.zeros(3*dat.numAper)
+erfInputVec = np.copy(runcg(dat, RTplot=False, trueF=fErfVec))
 
-#runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True,startVec=erfInputVec, trueFlu=fErfVec )
+runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True,startVec=erfInputVec, trueFlu=fErfVec )
 #runerf(dat, ['unifcent', 2], RTplot=True, finalShow=True, trueFlu=fErfVec )
 
 #runerf(dat, ['unifmixed', 4], RTplot=False, finalShow=True )
