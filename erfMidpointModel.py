@@ -41,7 +41,7 @@ class erfMidModel:
 
 
         # check if there is a seed target fluence, if not, default to sin
-        if trueFluenceVector != None and len(self.approxPoints) == len(trueFluenceVector):
+        if trueFluenceVector is not None and len(self.approxPoints) == len(trueFluenceVector):
             self.fTarget = trueFluenceVector
         else:
             self.fTarget = np.array(np.sin(self.sinScalar * self.approxPoints) + self.sinGap)

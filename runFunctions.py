@@ -6,7 +6,7 @@ from dataObj import *
 import math
 
 
-def runerf(data, initParams, RTplot=True, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None):
+def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None):
     mod = erfMidModel(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving,
                       initializationStringAndParams=initParams, startingSolutionVector=startVec,
                       trueFluenceVector=trueFlu)
