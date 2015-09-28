@@ -21,7 +21,7 @@ res = 0.01
 numAper = 30
 sigma = 0.075
 width = 10.
-b = 4 / math.sqrt(width)
+b = 1/ math.sqrt(width)
 c = 3.
 alphas = np.ones(int(width / res + 1))
 
@@ -54,14 +54,14 @@ a = np.array([width/3, width/6])
 # runerf(dat, ['unifmixed', 2], RTplot=False, startVec=erfInputVec, finalShow=True)
 
 #fErfVec = fGetter.erfSum(y,m,a,sigma, truncate=0.0)
-fErfVec = fGetter.sinFunction(b,c)
+fErfVec = fGetter.sinFunction(c,b)
 
 fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
 erfInputVec = np.zeros(3*dat.numAper)
 erfInputVec = np.copy(runcg(dat, RTplot=False, trueF=fErfVec))
 
 start = time.time()
-runerf(dat, ['unifcent', 2], RTplot=False, finalShow=False,startVec=erfInputVec, trueFlu=fErfVec )
+runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True,startVec=erfInputVec, trueFlu=fErfVec )
 print 'finished in {} seconds'.format(str(time.time()-start))
 #runerf(dat, ['unifcent', 2], RTplot=True, finalShow=True, trueFlu=fErfVec )
 

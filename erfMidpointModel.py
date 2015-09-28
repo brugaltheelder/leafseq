@@ -37,6 +37,7 @@ class erfMidModel:
         self.grad = np.zeros(3*self.K)
 
         # build solution vector bounds - intensity, center, width
+        # todo build in upper bounds on fluence
         self.bounds = np.array(
             [(0, None) for i in range(self.K)] + [(0 + self.aperCenterOffset, self.width - self.aperCenterOffset) for i
                                                   in range(self.K)] + [(self.minAperWidth, self.maxAperWidth) for i in
@@ -139,7 +140,7 @@ class erfMidModel:
 
         self.diff = self.fTarget - self.g  # difference in original and sequenced fluence
 
-        # todo add in gradient calculation
+
         alphaDiff = -2. * self.alphas * self.diff
         for k in range(self.K):
             self.grad[k] =  np.sum(alphaDiff * gHolder[:,k])
@@ -240,3 +241,5 @@ class erfMidModel:
                               'alphas': self.alphas, 'maxAperWidth': self.maxAperWidth,
                               'minAperWidth': self.minAperWidth,
                               'aperCenterOffset': self.aperCenterOffset})
+
+    #todo have a close figure function

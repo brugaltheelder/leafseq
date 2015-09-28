@@ -4,7 +4,7 @@ from erfMidpointModel import *
 from cgModel import *
 from dataObj import *
 import math
-
+from itertools import product
 
 def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None):
     mod = erfMidModel(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving,
@@ -23,3 +23,21 @@ def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False):
     mod.output('CGout.mat')
     print 'bestObj', mod.obj
     return mod.getErfInput()
+
+#todo fix this
+class paramTesting:
+    def __init__(self):
+        self.paramValues = []
+        self.paramName = []
+        self.paramRanges = []
+
+    def addParam(self, pName, pValues):
+        self.paramName.append(pName)
+        self.paramValues.append(pValues)
+        self.paramRanges.append(range(len(pValues)))
+
+    def genCombination(self):
+        self.combination = product(c for c in self.paramRanges)
+
+
+

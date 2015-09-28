@@ -126,7 +126,7 @@ class cgSolver:
         return self.approxPoints[l], self.approxPoints[r - 1]
 
     def solveRMP(self):
-        # todo build in upper bounds
+        # todo build in upper bounds on fluence
         self.res = spo.minimize(self.calcObjGrad, x0=self.y.copy(), method='L-BFGS-B', jac=True,
                                 bounds=np.array([(0, None) for i in range(np.size(self.y))]),
                                 options={'ftol': 1e-8, 'disp': False})
