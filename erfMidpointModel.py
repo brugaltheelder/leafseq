@@ -156,40 +156,6 @@ class erfMidModel:
         self.objCalls += 1
         return np.sum(self.alphas * (self.diff ** 2)), self.grad
 
-
-
-    # calculates the gradient
-    def gradEval(self, x, diff):
-        grad = np.zeros(self.K * 3)
-
-        for i in xrange(self.numApproxPoints):
-            di = diff[i]
-            ai = self.alphas[i]
-            gradCoef = -2.0 * ai * di
-
-            # case with approx[i] <= m_k (center to right of approx point)
-            idx = x[self.K:2 * self.K] >= self.approxPoints[i]
-
-            grad[0:self.K][idx] += gradCoef * (1 + sps.erf(
-                (self.approxPoints[i] - (x[self.K:2 * self.K][idx] - x[2 * self.K:3 * self.K][idx])) / self.sigma))
-            grad[self.K:2 * self.K][idx] += gradCoef * -1. / self.sigma * x[0:self.K][idx] * self.derf(
-                (self.approxPoints[i] - (x[self.K:2 * self.K][idx] - x[2 * self.K:3 * self.K][idx])) / self.sigma)
-            grad[2 * self.K:3 * self.K][idx] += gradCoef * 1. / self.sigma * x[0:self.K][idx] * self.derf(
-                (self.approxPoints[i] - (x[self.K:2 * self.K][idx] - x[2 * self.K:3 * self.K][idx])) / self.sigma)
-
-
-            # case with approx[i] > m_k (center to left of approx point)
-            idx = x[self.K:2 * self.K] < self.approxPoints[i]
-            grad[0:self.K][idx] += gradCoef * (
-                sps.erfc(
-                    (self.approxPoints[i] - (x[self.K:2 * self.K][idx] + x[2 * self.K:3 * self.K][idx])) / self.sigma))
-            grad[self.K:2 * self.K][idx] += gradCoef * 1. / self.sigma * x[0:self.K][idx] * self.derf(
-                (self.approxPoints[i] - (x[self.K:2 * self.K][idx] + x[2 * self.K:3 * self.K][idx])) / self.sigma)
-            grad[2 * self.K:3 * self.K][idx] += gradCoef * 1. / self.sigma * x[0:self.K][idx] * self.derf(
-                (self.approxPoints[i] - (x[self.K:2 * self.K][idx] + x[2 * self.K:3 * self.K][idx])) / self.sigma)
-
-        return grad
-
     # invokes solver
     def solve(self):
         self.res = spo.minimize(self.objGradEval, x0=self.varArray.copy(), method='L-BFGS-B', jac=True,
@@ -222,27 +188,29 @@ class erfMidModel:
 
         g = np.zeros(self.numApproxPoints)
 
-        # plots total sequenced fluence
-        for i in xrange(self.numApproxPoints):
-            # case with approx[i] <= m_k (center to right of approx point)
-            idx = self.finalX[self.K:2 * self.K] >= self.approxPoints[i]
-            g[i] += np.sum(self.finalX[0:self.K][idx] * (1 + sps.erf((self.approxPoints[i] - (
-                self.finalX[self.K:2 * self.K][idx] - self.finalX[2 * self.K:3 * self.K][idx])) / self.sigma)))
-            # case with approx[i] > m_k (center to left of approx point)
-            idx = self.finalX[self.K:2 * self.K] < self.approxPoints[i]
-            g[i] += np.sum(self.finalX[0:self.K][idx] * (sps.erfc((self.approxPoints[i] - (
-                self.finalX[self.K:2 * self.K][idx] + self.finalX[2 * self.K:3 * self.K][idx])) / self.sigma)))
+        # set g and gUnweighted to zero
+        gHolder = np.zeros((self.numApproxPoints, self.K))
+        gLeft = np.zeros(self.numApproxPoints)
+        gRight = np.zeros(self.numApproxPoints)
+
+        # calc unweighted g
+        for k in range(self.K):
+            gHolder[:,k] = 0.5 * (sps.erf((self.approxPoints-(self.finalX[self.K+k] - self.finalX[2*self.K+k]))/self.sigma) + sps.erfc((self.approxPoints-(self.finalX[self.K+k] + self.finalX[2*self.K+k]))/self.sigma) - 1)
+            g += self.finalX[k] * gHolder[:,k]
+
+
         plt.plot(self.approxPoints, g, 'g')
 
         # plots each individual aperture
         for k in range(self.K):
             # plot left error function up to center
+
             idx = self.approxPoints <= self.finalX[self.K + k]
-            plt.plot(self.approxPoints[idx], self.finalX[k] * (1 + sps.erf(
+            plt.plot(self.approxPoints[idx], self.finalX[k] * 1./2. * (1 + sps.erf(
                 (self.approxPoints[idx] - (self.finalX[self.K + k] - self.finalX[2 * self.K + k])) / self.sigma)), 'b')
             # plot right error function
             idx = self.approxPoints > self.finalX[self.K + k]
-            plt.plot(self.approxPoints[idx], self.finalX[k] * (
+            plt.plot(self.approxPoints[idx], self.finalX[k] / 2. * (
                 sps.erfc(
                     (self.approxPoints[idx] - (self.finalX[self.K + k] + self.finalX[2 * self.K + k])) / self.sigma)),
                      'b')
