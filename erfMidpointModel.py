@@ -27,12 +27,14 @@ class erfMidModel:
         self.numApproxPoints = int(self.width / self.resolution + 1)  # number of approximation points
         self.alphas = np.copy(runData.alphas)  # copy over objective function weights
 
+
         # generate approximation points, including endpoints
         self.approxPoints = np.arange(0, self.width + self.resolution / 2, self.resolution)
         # preallocate other often-used numpy arrays
         self.g = np.zeros(self.numApproxPoints)
         self.gUnweighted = np.zeros(self.numApproxPoints)
         self.diff = np.zeros(self.numApproxPoints)
+        self.grad = np.zeros(3*self.K)
 
         # build solution vector bounds - intensity, center, width
         self.bounds = np.array(
@@ -121,32 +123,38 @@ class erfMidModel:
     # returns both the objective function and the derivative for the solver
     def objGradEval(self, x):
 
-        g = np.zeros(self.numApproxPoints)
         grad = np.zeros(3*self.K)
         # set g and gUnweighted to zero
         self.g.fill(0)
         self.gUnweighted.fill(0)
-        gHolder = np.zeros(self.numApproxPoints)
-
+        self.grad.fill(0)
+        gHolder = np.zeros((self.numApproxPoints, self.K))
+        gLeft = np.zeros(self.numApproxPoints)
+        gRight = np.zeros(self.numApproxPoints)
 
         # calc unweighted g
         for k in range(self.K):
-            gHolder = 0.5 * (sps.erf((self.approxPoints-(x[self.K+k] - x[2*self.K+k]))/self.sigma) + sps.erfc((self.approxPoints-(x[self.K+k] + x[2*self.K+k]))/self.sigma) - 1)
-            self.g += x[k] * gHolder
-            # todo add in gradient calculation
+            gHolder[:,k] = 0.5 * (sps.erf((self.approxPoints-(x[self.K+k] - x[2*self.K+k]))/self.sigma) + sps.erfc((self.approxPoints-(x[self.K+k] + x[2*self.K+k]))/self.sigma) - 1)
+            self.g += x[k] * gHolder[:,k]
 
         self.diff = self.fTarget - self.g  # difference in original and sequenced fluence
+
+        # todo add in gradient calculation
+        alphaDiff = -2. * self.alphas * self.diff
+        for k in range(self.K):
+            self.grad[k] =  np.sum(alphaDiff * gHolder[:,k])
+            gLeft = 1./self.sigma * self.derf((self.approxPoints-(x[self.K+k] - x[2*self.K+k]))/self.sigma)
+            gRight = 1./self.sigma * self.derf((self.approxPoints-(x[self.K+k] + x[2*self.K+k]))/self.sigma)
+            self.grad[self.K+k] = x[k]/2. * np.sum(alphaDiff * (-gLeft+gRight))
+            self.grad[2*self.K+k] = x[k]/2. * np.sum(alphaDiff * (gLeft+gRight))
+
+
 
         # plot if necessary
         if self.realTimePlotting and self.objCalls % 5 == 0:
             self.plotSolution(True, x)
         self.objCalls += 1
-        return np.sum(self.alphas * (self.diff ** 2)), grad
-
-    # takes the sum of the squares for the objective function evaluation
-    def objEval(self):
-        return np.sum(self.alphas * (self.diff ** 2))
-
+        return np.sum(self.alphas * (self.diff ** 2)), self.grad
 
 
 
