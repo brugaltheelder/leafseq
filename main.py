@@ -17,23 +17,23 @@ import time
 
 
 # #data testing for CG + Explicit models
+res = 0.01
+numAper = 30
+sigma = 0.075
+width = 10.
+b = 4 / math.sqrt(width)
+c = 3.
+alphas = np.ones(int(width / res + 1))
+
+
+# data testing for 2-aper ERF objective
 # res = 0.01
-# numAper = 12
+# numAper = 2
 # sigma = 0.075
 # width = 10.
 # b = 2 / math.sqrt(width)
 # c = 3.
 # alphas = np.ones(int(width / res + 1))
-
-
-# data testing for 2-aper ERF objective
-res = 0.01
-numAper = 2
-sigma = 0.075
-width = 10.
-b = 2 / math.sqrt(width)
-c = 3.
-alphas = np.ones(int(width / res + 1))
 
 
 
@@ -46,11 +46,16 @@ y = np.array([1,1])
 m = np.array([width/2, width/2])
 a = np.array([width/3, width/6])
 
+
+
+
 # erfInputVec = np.zeros(3*dat.numAper)
 # erfInputVec = np.copy(runcg(dat, RTplot=False))
 # runerf(dat, ['unifmixed', 2], RTplot=False, startVec=erfInputVec, finalShow=True)
 
-fErfVec = fGetter.erfSum(y,m,a,sigma, truncate=0.0)
+#fErfVec = fGetter.erfSum(y,m,a,sigma, truncate=0.0)
+fErfVec = fGetter.sinFunction(b,c)
+
 fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
 erfInputVec = np.zeros(3*dat.numAper)
 erfInputVec = np.copy(runcg(dat, RTplot=False, trueF=fErfVec))
@@ -62,5 +67,5 @@ print 'finished in {} seconds'.format(str(time.time()-start))
 
 
 
-#runerf(dat, ['unifmixed', 4], RTplot=False, finalShow=False )
+#runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=True )
 
