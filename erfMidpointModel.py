@@ -29,6 +29,10 @@ class erfMidModel:
 
         # generate approximation points, including endpoints
         self.approxPoints = np.arange(0, self.width + self.resolution / 2, self.resolution)
+        # preallocate other often-used numpy arrays
+        self.g = np.zeros(self.numApproxPoints)
+        self.gUnweighted = np.zeros(self.numApproxPoints)
+        self.diff = np.zeros(self.numApproxPoints)
 
         # build solution vector bounds - intensity, center, width
         self.bounds = np.array(
@@ -117,32 +121,34 @@ class erfMidModel:
     # returns both the objective function and the derivative for the solver
     def objGradEval(self, x):
 
-        # calculate original fluence f, initialize  g
-
         g = np.zeros(self.numApproxPoints)
-        #todo flip the execution on this for loop if possible (using sum of two functions)
-        # todo Chnage how this is modeled to not be a for loop through numApproxPoints
-        # for each approximation point, calculate the sequenced fluence
-        for i in xrange(self.numApproxPoints):
-            # case with approx[i] <= m_k (center to right of approx point)
-            idx = x[self.K:2 * self.K] >= self.approxPoints[i]
-            g[i] += np.sum(x[0:self.K][idx] * (1 + sps.erf(
-                (self.approxPoints[i] - (x[self.K:2 * self.K][idx] - x[2 * self.K:3 * self.K][idx])) / self.sigma)))
-            # case with approx[i] > m_k (center to left of approx point)
-            idx = x[self.K:2 * self.K] < self.approxPoints[i]
-            g[i] += np.sum(x[0:self.K][idx] * (sps.erfc(
-                (self.approxPoints[i] - (x[self.K:2 * self.K][idx] + x[2 * self.K:3 * self.K][idx])) / self.sigma)))
-        diff = self.fTarget - g  # difference in original and sequenced fluence
+        grad = np.zeros(3*self.K)
+        # set g and gUnweighted to zero
+        self.g.fill(0)
+        self.gUnweighted.fill(0)
+        gHolder = np.zeros(self.numApproxPoints)
+
+
+        # calc unweighted g
+        for k in range(self.K):
+            gHolder = 0.5 * (sps.erf((self.approxPoints-(x[self.K+k] - x[2*self.K+k]))/self.sigma) + sps.erfc((self.approxPoints-(x[self.K+k] + x[2*self.K+k]))/self.sigma) - 1)
+            self.g += x[k] * gHolder
+            # todo add in gradient calculation
+
+        self.diff = self.fTarget - self.g  # difference in original and sequenced fluence
 
         # plot if necessary
         if self.realTimePlotting and self.objCalls % 5 == 0:
             self.plotSolution(True, x)
         self.objCalls += 1
-        return self.objEval(diff), self.gradEval(x, diff)
+        return np.sum(self.alphas * (self.diff ** 2)), grad
 
     # takes the sum of the squares for the objective function evaluation
-    def objEval(self, diff):
-        return np.sum(self.alphas * (diff ** 2))
+    def objEval(self):
+        return np.sum(self.alphas * (self.diff ** 2))
+
+
+
 
     # calculates the gradient
     def gradEval(self, x, diff):
