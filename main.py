@@ -37,6 +37,7 @@ alphas = np.ones(int(width / res + 1))
 
 
 
+
 #dat = dataObj([c, b], res, numAper, sigma, width, alphas, [0, width / 2., 0], 'TestRun')
 dat = dataObj([c, b], res, numAper, sigma, width, alphas, [2. / width, width / 2., 1. / width], 'TestRun')
 
