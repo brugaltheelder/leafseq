@@ -25,6 +25,7 @@ import time
 # c = 3.
 # alphas = np.ones(int(width / res + 1))
 
+
 # data testing for 2-aper ERF objective
 res = 0.01
 numAper = 2
