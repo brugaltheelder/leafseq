@@ -35,9 +35,12 @@ res = 0.01
 width = 10.
 sigma = 0.075
 alphas = np.ones(int(width / res + 1))
-minAperWidth = 1./width
-maxAperWidth = width/2.
-minAperEdgeGap = 0.1/width
+minAperWidth = 0.
+maxAperWidth = width
+minAperEdgeGap = 0.
+#minAperWidth = 1./width
+#maxAperWidth = width/2.
+#minAperEdgeGap = 0.1/width
 
 # Generate data vectors
 kParam = np.arange(5,45+1, 10)
@@ -92,7 +95,9 @@ for kInd,cInd,bInd in params.combination:
     params.addRuntimeList(iterRunTime)
 
     if len(params.obj)%10==0:
+        print 'Objective Function Values'
         print pandas.DataFrame(params.obj, [i for i in range(len(params.obj))], ['unifcent','unifwidth','unifmixed', 'cg','cgSeeded'])
+        print 'Run Times'
         print pandas.DataFrame(params.runTimes, [i for i in range(len(params.obj))], ['unifcent','unifwidth','unifmixed', 'cg','cgSeeded'])
 
 params.writeRuns('k_b_c_runsout.mat')

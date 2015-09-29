@@ -68,5 +68,5 @@ class paramTesting:
 
     def writeRuns(self, filename):
         import scipy.io as io
-        io.savemat('filename', {'paramNames':self.paramName, 'paramRanges':self.paramRanges, 'paramValues':self.paramValues,
+        io.savemat(filename, {'paramNames':self.paramName, 'paramRanges':self.paramRanges, 'paramValues':self.paramValues,
                                 'objectives':self.obj, 'runTimes':self.runTimes, 'paramList':self.paramList})
