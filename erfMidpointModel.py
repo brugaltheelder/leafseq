@@ -4,6 +4,8 @@ import numpy as np
 import scipy.optimize as spo
 import scipy.special as sps
 from scipy import io
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from dataObj import *
 
@@ -11,7 +13,7 @@ from dataObj import *
 class erfMidModel:
     # class initialization
     def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, startingSolutionVector=None,
-                 trueFluenceVector=None, initializationStringAndParams=None):
+                 trueFluenceVector=None, initializationStringAndParams=None, displayFreq = False):
 
         # Read in parameters
         assert (isinstance(runData, dataObj))
@@ -23,6 +25,7 @@ class erfMidModel:
         self.minAperWidth, self.maxAperWidth, self.aperCenterOffset = runData.minAperWidth, runData.maxAperWidth, runData.aperCenterOffset  # min/max bounds for aper width, aper center offset from edges
         self.runTag = runData.runTag
         self.objCalls = 0
+        self.displayFreq = displayFreq
         # Initialize values
         self.numApproxPoints = int(self.width / self.resolution + 1)  # number of approximation points
         self.alphas = np.copy(runData.alphas)  # copy over objective function weights
@@ -161,7 +164,7 @@ class erfMidModel:
     def solve(self):
         self.res = spo.minimize(self.objGradEval, x0=self.varArray.copy(), method='L-BFGS-B', jac=True,
                                 bounds=self.bounds,
-                                options={'ftol': 1e-4, 'disp': 10})
+                                options={'ftol': 1e-4, 'disp': self.displayFreq})
         self.finalX = self.res['x']
         self.obj = self.res['fun']
 
@@ -230,6 +233,10 @@ class erfMidModel:
                 plt.show()
             else:
                 plt.show(block = False)
+
+    def closePlots(self):
+        plt.close('all')
+
 
 
     # outputs values to a .mat file incase of MATLAB integration

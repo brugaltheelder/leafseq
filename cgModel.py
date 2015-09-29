@@ -5,12 +5,14 @@ import scipy.optimize as spo
 import scipy.special as sps
 import scipy.sparse as spsparse
 from scipy import io
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from dataObj import *
 
 
 class cgSolver:
-    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None):
+    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None, displayFreq = False):
         # def __init__(self, numApproxPoints, alphas, f, sigma, approxPoints):
         self.realTimePlotting, self.realTimePlotSaving = realTimePlotting, realTimePlotSaving
         self.K, self.width, self.resolution = runData.numAper, 1.0 * runData.width, 1.0 * runData.resolution  # num apers, width of row, spacing of approx
@@ -19,6 +21,7 @@ class cgSolver:
                                                       1]  # shift for sin obj, scacling factor for erf, sin scaling factor
         self.runTag = runData.runTag
         self.objCalls = 0
+        self.displayFreq = displayFreq
         # Initialize values
         self.nApprox = int(self.width / self.resolution + 1)  # number of approximation points
         self.alphas = np.copy(runData.alphas)  # copy over objective function weights
@@ -76,8 +79,6 @@ class cgSolver:
     def solvePP(self, y):
         # calc gradient
         grad = self.evalGrad(y)
-        print grad
-
 
         # do search
         # helper variables
@@ -97,17 +98,19 @@ class cgSolver:
         while np.size(self.y) < self.aperMax:
             lPos,rPos = self.solvePP(self.y)
             self.solveRMP()
-            print 'Aperures {} of {} added, lPos: {}, rPos: {}, Obj: {}'.format(str(np.size(self.y)), str(self.aperMax), lPos, rPos,str(self.obj))
+            #print 'Aperures {} of {} added, lPos: {}, rPos: {}, Obj: {}'.format(str(np.size(self.y)), str(self.aperMax), lPos, rPos,str(self.obj))
 
     def addAper(self, l, r):
         # calculate col of D, add to sparse matrix using error function...make midpoint then write out function...truncate at very small
         # calc Dcol along entire axis, then truncate
         Dcol = np.zeros(self.nApprox)
-        midpoint = self.approxPoints[l] + 1.0 * (self.approxPoints[(r - 1)] - self.approxPoints[l]) / 2.
-        idx = self.approxPoints <= midpoint
-        Dcol[idx] += 1 + sps.erf((self.approxPoints[idx] - self.approxPoints[l]) / self.sigma)
-        idx = self.approxPoints > midpoint
-        Dcol[idx] += sps.erfc((self.approxPoints[idx] - self.approxPoints[(r - 1)]) / self.sigma)
+        Dcol += 1./2. * (sps.erf((self.approxPoints - self.approxPoints[l]) / self.sigma) + sps.erfc((self.approxPoints - self.approxPoints[(r - 1)]) / self.sigma) -1)
+
+        # midpoint = self.approxPoints[l] + 1.0 * (self.approxPoints[(r - 1)] - self.approxPoints[l]) / 2.
+        # idx = self.approxPoints <= midpoint
+        # Dcol[idx] += 1 + sps.erf((self.approxPoints[idx] - self.approxPoints[l]) / self.sigma)
+        # idx = self.approxPoints > midpoint
+        # Dcol[idx] += sps.erfc((self.approxPoints[idx] - self.approxPoints[(r - 1)]) / self.sigma)
         Dcol[Dcol < self.Dtolerance] = 0
         Dcol_sparse = spsparse.csc_matrix(Dcol).transpose()
 
@@ -129,7 +132,7 @@ class cgSolver:
         # todo build in upper bounds on fluence
         self.res = spo.minimize(self.calcObjGrad, x0=self.y.copy(), method='L-BFGS-B', jac=True,
                                 bounds=np.array([(0, None) for i in range(np.size(self.y))]),
-                                options={'ftol': 1e-8, 'disp': False})
+                                options={'ftol': 1e-8, 'disp': self.displayFreq})
         self.y = self.res['x']
         self.obj = self.res['fun']
 
@@ -172,13 +175,15 @@ class cgSolver:
 
         plt.plot(self.approxPoints, self.f, 'r')
 
-        # Sets coherent limits to plot
-        plt.ylim(0, 1.2 * max(np.max(yVec), self.sinGap + 1))
-        plt.xlim(0, self.width)
-
         # plots total sequenced fluence
         g = self.D.dot(yVec)
         plt.plot(self.approxPoints, g, 'g')
+
+        # Sets coherent limits to plot
+        plt.ylim(0, 1.2 * max(np.max(g), self.sinGap + 1))
+        plt.xlim(0, self.width)
+
+
 
         # plots each individual aperture
         for k in range(np.size(yVec)):
@@ -199,3 +204,5 @@ class cgSolver:
                 plt.show()
             else:
                 plt.show(block = False)
+    def closePlots(self):
+        plt.close('all')

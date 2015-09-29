@@ -39,7 +39,8 @@ alphas = np.ones(int(width / res + 1))
 
 
 #dat = dataObj([c, b], res, numAper, sigma, width, alphas, [0, width / 2., 0], 'TestRun')
-dat = dataObj([c, b], res, numAper, sigma, width, alphas, [2. / width, width / 2., 1. / width], 'TestRun')
+#dat = dataObj([c, b], res, numAper, sigma, width, alphas, [2. / width, width / 2., 1. / width], 'TestRun')
+dat = dataObj([c, b], res, numAper, sigma, width, alphas, [0., width , 0.], 'TestRun')
 
 fGetter = functionGetter(width, res)
 y = np.array([1,1])
@@ -57,7 +58,7 @@ a = np.array([width/3, width/6])
 fErfVec = fGetter.sinFunction(c,b)
 
 fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
-erfInputVec = np.zeros(3*dat.numAper)
+#erfInputVec = np.zeros(3*dat.numAper)
 erfInputVec = np.copy(runcg(dat, RTplot=False, trueF=fErfVec))
 
 start = time.time()
