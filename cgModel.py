@@ -12,7 +12,7 @@ from dataObj import *
 
 
 class cgSolver:
-    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None, displayFreq = False):
+    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None, displayFreq = False, plotTag = ''):
         # def __init__(self, numApproxPoints, alphas, f, sigma, approxPoints):
         self.realTimePlotting, self.realTimePlotSaving = realTimePlotting, realTimePlotSaving
         self.K, self.width, self.resolution = runData.numAper, 1.0 * runData.width, 1.0 * runData.resolution  # num apers, width of row, spacing of approx
@@ -22,6 +22,7 @@ class cgSolver:
         self.runTag = runData.runTag
         self.objCalls = 0
         self.displayFreq = displayFreq
+        self.plotTag = plotTag
         # Initialize values
         self.nApprox = int(self.width / self.resolution + 1)  # number of approximation points
         self.alphas = np.copy(runData.alphas)  # copy over objective function weights
@@ -199,7 +200,7 @@ class cgSolver:
             plt.title('Method: CG, obj: '+str(self.obj) + ', nAper: ' + str(np.size(self.y)))
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
-            plt.savefig(self.runTag + '_CGfinalPlotOut.png')
+            plt.savefig(self.runTag + '_' + self.plotTag + '.png')
             if finalShow:
                 plt.show()
             else:

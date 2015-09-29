@@ -40,7 +40,7 @@ maxAperWidth = width/2.
 minAperEdgeGap = 0.1/width
 
 # Generate data vectors
-kParam = np.arange(5,50+1, 15)
+kParam = np.arange(5,45+1, 10)
 cParam = np.arange(2,5+1, 3)
 bParam = np.arange(1./width, 13./width+1./width, 3./width)
 
@@ -63,29 +63,29 @@ for kInd,cInd,bInd in params.combination:
     # run naive techniques
     #unifcent
     start = time.time()
-    iterObj.append(runerf(dat, ['unifcent', 3], RTplot=False, finalShow=False, outputName='unifcent_out.mat', closePlots = True))
+    iterObj.append(runerf(dat, ['unifcent', 3], RTplot=False, finalShow=False, outputName='unifcent_out.mat', closePlots = True, pTag='unifcent'))
     iterRunTime.append(time.time() - start)
 
     #unifwidth
     start = time.time()
-    iterObj.append(runerf(dat, ['unifwidth', 3], RTplot=False, finalShow=False, outputName='unifwidth_out.mat', closePlots = True))
+    iterObj.append(runerf(dat, ['unifwidth', 3], RTplot=False, finalShow=False, outputName='unifwidth_out.mat', closePlots = True, pTag='unifwidth'))
     iterRunTime.append(time.time() - start)
 
     #unifmixed
     start = time.time()
-    iterObj.append(runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='unifmixed_out.mat', closePlots = True))
+    iterObj.append(runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='unifmixed_out.mat', closePlots = True, pTag='unifmixed'))
     iterRunTime.append(time.time() - start)
 
     # run CG
     start = time.time()
-    erfInputVec, obj = runcg(dat,RTplot=False, finalShow=False, outputName= 'cg_out.mat', closePlots = True)
+    erfInputVec, obj = runcg(dat,RTplot=False, finalShow=False, outputName= 'cg_out.mat', closePlots = True, pTag='cg')
     iterObj.append(obj)
     iterRunTime.append(time.time()-start)
 
 
     # run explicit based on cg
     start = time.time()
-    iterObj.append(runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cgSeeded_out.mat', closePlots = True, startVec=erfInputVec))
+    iterObj.append(runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cgSeeded_out.mat', closePlots = True, startVec=erfInputVec, pTag='cgSeeded'))
     iterRunTime.append(time.time() - start)
 
     params.addObjList(iterObj)

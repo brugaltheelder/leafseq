@@ -13,7 +13,7 @@ from dataObj import *
 class erfMidModel:
     # class initialization
     def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, startingSolutionVector=None,
-                 trueFluenceVector=None, initializationStringAndParams=None, displayFreq = False):
+                 trueFluenceVector=None, initializationStringAndParams=None, displayFreq = False, plotTag = ''):
 
         # Read in parameters
         assert (isinstance(runData, dataObj))
@@ -26,6 +26,7 @@ class erfMidModel:
         self.runTag = runData.runTag
         self.objCalls = 0
         self.displayFreq = displayFreq
+        self.plotTag = plotTag
         # Initialize values
         self.numApproxPoints = int(self.width / self.resolution + 1)  # number of approximation points
         self.alphas = np.copy(runData.alphas)  # copy over objective function weights
@@ -228,7 +229,7 @@ class erfMidModel:
             plt.title('Method: ERF, obj: '+str(self.obj) + ', nAper: ' + str(self.K))
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
-            plt.savefig(self.runTag + '_ERFfinalPlotOut.png')
+            plt.savefig(self.runTag + '_' + self.plotTag + '.png')
             if finalShow:
                 plt.show()
             else:

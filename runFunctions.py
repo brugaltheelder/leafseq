@@ -6,10 +6,10 @@ from dataObj import *
 import math
 from itertools import product
 
-def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None, outputName='out.mat', closePlots = False, dispFreq = False):
+def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None, outputName='out.mat', closePlots = False, dispFreq = False, pTag = ''):
     mod = erfMidModel(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving,
                       initializationStringAndParams=initParams, startingSolutionVector=startVec,
-                      trueFluenceVector=trueFlu, displayFreq=dispFreq)
+                      trueFluenceVector=trueFlu, displayFreq=dispFreq, plotTag=pTag)
     mod.solve()
     mod.plotSolution(finalShow=finalShow)
     mod.output(outputName)
@@ -19,8 +19,8 @@ def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, fi
     return mod.obj
 
 
-def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False,outputName='out.mat', closePlots = False, dispFreq = False):
-    mod = cgSolver(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving, trueFluenceVector=trueF, displayFreq=dispFreq)
+def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False,outputName='out.mat', closePlots = False, dispFreq = False, pTag = ''):
+    mod = cgSolver(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving, trueFluenceVector=trueF, displayFreq=dispFreq, plotTag=pTag)
     mod.solve(data.numAper)
     mod.printSolution(finalShow=finalShow)
     mod.output(outputName)
