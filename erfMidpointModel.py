@@ -250,4 +250,3 @@ class erfMidModel:
                               'minAperWidth': self.minAperWidth,
                               'aperCenterOffset': self.aperCenterOffset})
 
-    #todo have a close figure function

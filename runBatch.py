@@ -55,6 +55,8 @@ params.addParam('sinScalar',bParam.tolist())
 params.genCombination()
 
 
+# todo do a run batch with width bounds
+
 
 for kInd,cInd,bInd in params.combination:
     kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)

@@ -29,7 +29,7 @@ def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False,ou
     #print 'bestObj', mod.obj
     return mod.getErfInput(), mod.obj
 
-#todo fix this
+
 class paramTesting:
     def __init__(self):
         self.paramValues = []
@@ -38,6 +38,7 @@ class paramTesting:
         self.obj = []
         self.paramList = []
         self.runTimes = []
+        self.totalMUs = []  # todo have a way to populate this
 
     def addParam(self, pName, pValues):
         self.paramName.append(pName)
@@ -69,4 +70,5 @@ class paramTesting:
     def writeRuns(self, filename):
         import scipy.io as io
         io.savemat(filename, {'paramNames':self.paramName, 'paramRanges':self.paramRanges, 'paramValues':self.paramValues,
-                                'objectives':self.obj, 'runTimes':self.runTimes, 'paramList':self.paramList})
+                              'objectives': self.obj, 'runTimes': self.runTimes, 'paramList': self.paramList},
+                   'totalMU':self.totalMUs)
