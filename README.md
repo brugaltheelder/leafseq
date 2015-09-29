@@ -14,9 +14,8 @@ All of these come with anaconda's python distribution. On Chewie (Troy's linux w
 
 Can comment out following lines to activate live plotting:
 
-*import matplotlib*
-
-*matplotlib.use('Agg')*
+    import matplotlib
+    matplotlib.use('Agg')
 
 To Run:
 ----------
