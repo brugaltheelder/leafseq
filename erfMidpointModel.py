@@ -4,8 +4,8 @@ import numpy as np
 import scipy.optimize as spo
 import scipy.special as sps
 from scipy import io
-import matplotlib
-matplotlib.use('Agg')
+# import matplotlib
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from dataObj import *
 
@@ -226,7 +226,7 @@ class erfMidModel:
                 plt.savefig(self.runTag + '_ERFiterPlotOut_' + str(self.figCounter) + '.png')
                 self.figCounter += 1
         else:
-            plt.title('Method: ERF, obj: '+str(self.obj) + ', nAper: ' + str(self.K))
+            plt.title('Method: ERF, obj: ' + str(round(self.obj, 5)) + ', nAper: ' + str(self.K))
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
             plt.savefig(self.runTag + '_' + self.plotTag + '.png')

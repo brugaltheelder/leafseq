@@ -19,15 +19,20 @@ def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, fi
     return mod.obj
 
 
-def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False,outputName='out.mat', closePlots = False, dispFreq = False, pTag = ''):
-    mod = cgSolver(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving, trueFluenceVector=trueF, displayFreq=dispFreq, plotTag=pTag)
+def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False, outputName='out.mat', closePlots=False,
+          dispFreq=False, pTag='', simpG=False):
+    mod = cgSolver(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving, trueFluenceVector=trueF,
+                   displayFreq=dispFreq, plotTag=pTag, simpleG=simpG)
     mod.solve(data.numAper)
     mod.printSolution(finalShow=finalShow)
     mod.output(outputName)
     if closePlots:
         mod.closePlots()
     #print 'bestObj', mod.obj
-    return mod.getErfInput(), mod.obj
+    obj = mod.obj
+    if simpG:
+        obj = mod.finalObjEval()
+    return obj, mod.getErfInput(), mod.obj
 
 
 class paramTesting:
@@ -70,5 +75,5 @@ class paramTesting:
     def writeRuns(self, filename):
         import scipy.io as io
         io.savemat(filename, {'paramNames':self.paramName, 'paramRanges':self.paramRanges, 'paramValues':self.paramValues,
-                              'objectives': self.obj, 'runTimes': self.runTimes, 'paramList': self.paramList},
-                   'totalMU':self.totalMUs)
+                              'objectives': self.obj, 'runTimes': self.runTimes, 'paramList': self.paramList,
+                              'totalMU': self.totalMUs})

@@ -5,14 +5,15 @@ import scipy.optimize as spo
 import scipy.special as sps
 import scipy.sparse as spsparse
 from scipy import io
-import matplotlib
-matplotlib.use('Agg')
+# import matplotlib
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from dataObj import *
 
 
 class cgSolver:
-    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None, displayFreq = False, plotTag = ''):
+    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None,
+                 displayFreq=False, plotTag='', simpleG=False):
         # def __init__(self, numApproxPoints, alphas, f, sigma, approxPoints):
         self.realTimePlotting, self.realTimePlotSaving = realTimePlotting, realTimePlotSaving
         self.K, self.width, self.resolution = runData.numAper, 1.0 * runData.width, 1.0 * runData.resolution  # num apers, width of row, spacing of approx
@@ -23,6 +24,7 @@ class cgSolver:
         self.objCalls = 0
         self.displayFreq = displayFreq
         self.plotTag = plotTag
+        self.simpleG = simpleG
         # Initialize values
         self.nApprox = int(self.width / self.resolution + 1)  # number of approximation points
         self.alphas = np.copy(runData.alphas)  # copy over objective function weights
@@ -77,6 +79,17 @@ class cgSolver:
             diff = self.f - self.g
         return np.sum(self.alphas * (diff ** 2))
 
+    def finalObjEval(self):
+        # generate new D
+        Ds = np.zeros((self.nApprox, len(self.y)))
+        for y in range(len(self.y)):
+            Ds[:, y] = 1. / 2. * (sps.erf((self.approxPoints - self.lVec[y]) / self.sigma) + sps.erfc(
+                (self.approxPoints - self.rVec[y]) / self.sigma) - 1)
+        g = Ds.dot(self.y)
+        diff = self.f - g
+        return np.sum(self.alphas * (diff ** 2))
+
+
     def solvePP(self, y):
         # calc gradient
         grad = self.evalGrad(y)
@@ -105,14 +118,16 @@ class cgSolver:
         # calculate col of D, add to sparse matrix using error function...make midpoint then write out function...truncate at very small
         # calc Dcol along entire axis, then truncate
         Dcol = np.zeros(self.nApprox)
-        Dcol += 1./2. * (sps.erf((self.approxPoints - self.approxPoints[l]) / self.sigma) + sps.erfc((self.approxPoints - self.approxPoints[(r - 1)]) / self.sigma) -1)
+        if self.simpleG:
+            # ind = np.all([self.approxPoints>=self.approxPoints[l], self.approxPoints<self.approxPoints[r]],axis=0)
+            # print np.sum(ind), Dcol
+            Dcol[l:r] = 1
 
-        # midpoint = self.approxPoints[l] + 1.0 * (self.approxPoints[(r - 1)] - self.approxPoints[l]) / 2.
-        # idx = self.approxPoints <= midpoint
-        # Dcol[idx] += 1 + sps.erf((self.approxPoints[idx] - self.approxPoints[l]) / self.sigma)
-        # idx = self.approxPoints > midpoint
-        # Dcol[idx] += sps.erfc((self.approxPoints[idx] - self.approxPoints[(r - 1)]) / self.sigma)
-        Dcol[Dcol < self.Dtolerance] = 0
+        else:
+            Dcol = 1. / 2. * (sps.erf((self.approxPoints - self.approxPoints[l]) / self.sigma) + sps.erfc(
+                (self.approxPoints - self.approxPoints[(r - 1)]) / self.sigma) - 1)
+            Dcol[Dcol < self.Dtolerance] = 0
+
         Dcol_sparse = spsparse.csc_matrix(Dcol).transpose()
 
         if np.size(self.y) > 0:
@@ -197,7 +212,7 @@ class cgSolver:
                 plt.savefig('CGiterPlotOut_' + str(self.figCounter) + '_.png')
                 self.figCounter += 1
         else:
-            plt.title('Method: CG, obj: '+str(self.obj) + ', nAper: ' + str(np.size(self.y)))
+            plt.title('Method: CG, obj: ' + str(round(self.obj, 5)) + ', nAper: ' + str(np.size(self.y)))
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
             plt.savefig(self.runTag + '_' + self.plotTag + '.png')

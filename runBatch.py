@@ -9,6 +9,9 @@ except ImportError:
     have_mkl = False
     print("Running with normal backends")
 
+import matplotlib
+
+matplotlib.use('Agg')
 
 from runFunctions import *
 from fluenceFunctionBuilders import *
@@ -83,7 +86,7 @@ for kInd,cInd,bInd in params.combination:
 
     # run CG
     start = time.time()
-    erfInputVec, obj = runcg(dat,RTplot=False, finalShow=False, outputName= 'cg_out.mat', closePlots = True, pTag='cg')
+    obj, erfInputVec = runcg(dat, RTplot=False, finalShow=False, outputName='cg_out.mat', closePlots=True, pTag='cg')
     iterObj.append(obj)
     iterRunTime.append(time.time()-start)
 

@@ -9,7 +9,8 @@ except ImportError:
     have_mkl = False
     print("Running with normal backends")
 
-
+# import matplotlib
+# matplotlib.use('Agg')
 from runFunctions import *
 from fluenceFunctionBuilders import *
 import numpy as np
@@ -18,10 +19,10 @@ import time
 
 # #data testing for CG + Explicit models
 res = 0.01
-numAper = 30
+numAper = 20
 sigma = 0.075
 width = 10.
-b = 1/ math.sqrt(width)
+b = 4 / math.sqrt(width)
 c = 3.
 alphas = np.ones(int(width / res + 1))
 
@@ -59,10 +60,15 @@ fErfVec = fGetter.sinFunction(c,b)
 
 fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
 #erfInputVec = np.zeros(3*dat.numAper)
-erfInputVec = np.copy(runcg(dat, RTplot=False, trueF=fErfVec))
+# obj, erfInputVec = runcg(dat, RTplot=False, trueF=fErfVec)
+# print runcg(dat, RTplot=False, trueF=fErfVec)
+obj, erfInputVec, poorobj = runcg(dat, RTplot=False, simpG=True)
+print obj, poorobj
+
 
 start = time.time()
-runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True,startVec=erfInputVec, trueFlu=fErfVec )
+print runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True, startVec=erfInputVec)
+# print runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True,startVec=erfInputVec, trueFlu=fErfVec )
 print 'finished in {} seconds'.format(str(time.time()-start))
 #runerf(dat, ['unifcent', 2], RTplot=True, finalShow=True, trueFlu=fErfVec )
 
