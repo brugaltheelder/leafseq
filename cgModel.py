@@ -46,7 +46,7 @@ class cgSolver:
 
         # initiailze D sparse matrix of dimension (0,num points)
         self.D = np.zeros((self.nApprox, self.K))
-        #self.D = spsparse.csc_matrix((self.nApprox, 0))
+
 
         # initialize solution D vector
         self.g = np.zeros(self.nApprox)
@@ -110,7 +110,6 @@ class cgSolver:
 
     def solve(self, aperMax):
         self.aperMax = aperMax
-        # while np.size(self.y) < self.aperMax:
         while self.nY < self.aperMax:
             lPos,rPos = self.solvePP(self.y)
             self.solveRMP()
@@ -121,8 +120,7 @@ class cgSolver:
         # calc Dcol along entire axis, then truncate
         Dcol = np.zeros(self.nApprox)
         if self.simpleG:
-            # ind = np.all([self.approxPoints>=self.approxPoints[l], self.approxPoints<self.approxPoints[r]],axis=0)
-            # print np.sum(ind), Dcol
+
             Dcol[l:r] = 1
 
         else:
@@ -130,17 +128,10 @@ class cgSolver:
                 (self.approxPoints - self.approxPoints[(r - 1)]) / self.sigma) - 1)
             Dcol[Dcol < self.Dtolerance] = 0
 
-        # Dcol_sparse = spsparse.csc_matrix(Dcol).transpose()
-        #
-        # if np.size(self.y) > 0:
-        #     self.D = spsparse.hstack([self.D, Dcol_sparse])
-        # else:
-        #     self.D = Dcol_sparse.copy()
 
         self.D[:, self.nY] = Dcol
 
-        # generate y-value for y-vector
-        #self.y = np.resize(self.y, (1, np.size(self.y) + 1))
+
 
         # save l and r positions
 
