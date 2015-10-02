@@ -40,10 +40,14 @@ class cgSolver:
             self.f = np.array(np.sin(self.sinScalar * self.approxPoints) + self.sinGap)
 
         # initialize y vector (intensities)
-        self.y = np.array([])
+        self.y = np.zeros(self.K)
+        self.nY = 0
+        # self.y = np.array([])
 
         # initiailze D sparse matrix of dimension (0,num points)
-        self.D = spsparse.csc_matrix((self.nApprox, 0))
+        self.D = np.zeros((self.nApprox, self.K))
+        #self.D = spsparse.csc_matrix((self.nApprox, 0))
+
         # initialize solution D vector
         self.g = np.zeros(self.nApprox)
         self.lVec = np.array([])
@@ -65,10 +69,7 @@ class cgSolver:
     def evalGrad(self, y, diff=None):
         # if diff==None, then calc diff, otherwise return gradient
         if diff is None:
-            if np.size(y) > 0:
-                self.g = self.D.dot(y)
-            else:
-                self.g = np.zeros(self.nApprox)
+            self.g = self.D.dot(y)
             diff = self.f - self.g
         return -2. * self.alphas * diff
 
@@ -109,7 +110,8 @@ class cgSolver:
 
     def solve(self, aperMax):
         self.aperMax = aperMax
-        while np.size(self.y) < self.aperMax:
+        # while np.size(self.y) < self.aperMax:
+        while self.nY < self.aperMax:
             lPos,rPos = self.solvePP(self.y)
             self.solveRMP()
             #print 'Aperures {} of {} added, lPos: {}, rPos: {}, Obj: {}'.format(str(np.size(self.y)), str(self.aperMax), lPos, rPos,str(self.obj))
@@ -128,20 +130,23 @@ class cgSolver:
                 (self.approxPoints - self.approxPoints[(r - 1)]) / self.sigma) - 1)
             Dcol[Dcol < self.Dtolerance] = 0
 
-        Dcol_sparse = spsparse.csc_matrix(Dcol).transpose()
+        # Dcol_sparse = spsparse.csc_matrix(Dcol).transpose()
+        #
+        # if np.size(self.y) > 0:
+        #     self.D = spsparse.hstack([self.D, Dcol_sparse])
+        # else:
+        #     self.D = Dcol_sparse.copy()
 
-        if np.size(self.y) > 0:
-            self.D = spsparse.hstack([self.D, Dcol_sparse])
-        else:
-            self.D = Dcol_sparse.copy()
+        self.D[:, self.nY] = Dcol
 
         # generate y-value for y-vector
-        self.y = np.resize(self.y, (1, np.size(self.y) + 1))
+        #self.y = np.resize(self.y, (1, np.size(self.y) + 1))
 
         # save l and r positions
 
         self.lVec = np.append(self.lVec, self.approxPoints[l])
         self.rVec = np.append(self.rVec, self.approxPoints[r-1])
+        self.nY +=1
         return self.approxPoints[l], self.approxPoints[r - 1]
 
     def solveRMP(self):
@@ -204,7 +209,7 @@ class cgSolver:
         # plots each individual aperture
         for k in range(np.size(yVec)):
             # plot left error function up to center
-            plt.plot(self.approxPoints, yVec[k] * self.D.getcol(k).todense(), 'b')
+            plt.plot(self.approxPoints, yVec[k] * self.D[:, k], 'b')
             # updates figure
         if ongoingfig:
             plt.draw()

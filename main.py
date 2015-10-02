@@ -61,7 +61,7 @@ fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
 #erfInputVec = np.zeros(3*dat.numAper)
 # obj, erfInputVec = runcg(dat, RTplot=False, trueF=fErfVec)
 # print runcg(dat, RTplot=False, trueF=fErfVec)
-obj, erfInputVec, poorobj = runcg(dat, RTplot=False, simpG=True)
+obj, erfInputVec, mus, poorobj = runcg(dat, RTplot=False, simpG=True)
 print obj, poorobj
 
 

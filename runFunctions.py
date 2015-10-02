@@ -44,8 +44,8 @@ class paramTesting:
         self.obj = []
         self.paramList = []
         self.runTimes = []
-        self.totalMUs = []  # todo have a way to populate this
-
+        self.totalMUs = [] \
+ \
     def addParam(self, pName, pValues):
         self.paramName.append(pName)
         self.paramValues.append(pValues)
@@ -59,6 +59,9 @@ class paramTesting:
 
     def addRuntimeList(self, rTimes):
         self.runTimes.append(rTimes)
+
+    def addMUList(self, MUs):
+        self.totalMUs.append(MUs)
 
     def getAndSaveParams(self, *indices):
         params = [self.paramValues[i][indices[i]] for i in range(len(indices))]

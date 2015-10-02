@@ -46,7 +46,7 @@ minAperEdgeGap = 0.
 #minAperEdgeGap = 0.1/width
 
 # Generate data vectors
-kParam = np.arange(45, 45 + 1, 10)
+kParam = np.arange(5, 45 + 1, 10)
 # kParam = np.arange(5,10+1, 10)
 cParam = np.arange(2,5+1, 3)
 bParam = np.arange(1./width, 13./width+1./width, 3./width)
@@ -132,6 +132,7 @@ for kInd,cInd,bInd in params.combination:
 
     params.addObjList(iterObj)
     params.addRuntimeList(iterRunTime)
+    params.addMUList(iterMUs)
 
     if len(params.obj)%10==0:
         print 'Objective Function Values'
@@ -146,4 +147,4 @@ for kInd,cInd,bInd in params.combination:
 
 
 
-# params.writeRuns('k_b_c_runsout.mat')
+params.writeRuns('k_b_c_runsout.mat')
