@@ -6,6 +6,7 @@ from dataObj import *
 import math
 from itertools import product
 
+
 def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None, outputName='out.mat', closePlots = False, dispFreq = False, pTag = ''):
     mod = erfMidModel(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving,
                       initializationStringAndParams=initParams, startingSolutionVector=startVec,
@@ -16,7 +17,7 @@ def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, fi
     if closePlots:
         mod.closePlots()
     #print 'bestObj', mod.obj
-    return mod.obj
+    return mod.obj, np.sum(mod.varArray[0:mod.K])
 
 
 def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False, outputName='out.mat', closePlots=False,
@@ -32,7 +33,7 @@ def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False, o
     obj = mod.obj
     if simpG:
         obj = mod.finalObjEval()
-    return obj, mod.getErfInput(), mod.obj
+    return obj, mod.getErfInput(), np.sum(mod.y[0:mod.K]), mod.obj
 
 
 class paramTesting:
