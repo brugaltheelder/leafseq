@@ -1,9 +1,7 @@
 __author__ = 's162195'
 
-import numpy as np
 import scipy.optimize as spo
 import scipy.special as sps
-import scipy.sparse as spsparse
 from scipy import io
 # import matplotlib
 # matplotlib.use('Agg')
@@ -12,6 +10,7 @@ from dataObj import *
 
 
 class cgSolver:
+    # reads in runData along with other run tags, pre-allocates values
     def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None,
                  displayFreq=False, plotTag='', simpleG=False):
         # def __init__(self, numApproxPoints, alphas, f, sigma, approxPoints):
@@ -60,12 +59,13 @@ class cgSolver:
             plt.ion()
             plt.show()
 
-
+    # returs obj, gradient
     def calcObjGrad(self, y):
         self.g = self.D.dot(y)
         diff = self.f - self.g
         return self.evalObj(y, diff=diff), self.D.transpose().dot(self.evalGrad(y, diff=diff))
 
+    # evaluates gradient in y-space
     def evalGrad(self, y, diff=None):
         # if diff==None, then calc diff, otherwise return gradient
         if diff is None:
@@ -73,6 +73,7 @@ class cgSolver:
             diff = self.f - self.g
         return -2. * self.alphas * diff
 
+    #evaluates objective
     def evalObj(self, y, diff=None):
         # if diff==None, then calc diff, otherwise return objective
         if diff is None:
@@ -80,6 +81,7 @@ class cgSolver:
             diff = self.f - self.g
         return np.sum(self.alphas * (diff ** 2))
 
+    #evaluates objective with erf leaves rather than unit step leaves
     def finalObjEval(self):
         # generate new D
         Ds = np.zeros((self.nApprox, len(self.y)))
@@ -90,7 +92,7 @@ class cgSolver:
         diff = self.f - g
         return np.sum(self.alphas * (diff ** 2))
 
-
+    #solve the leaf pricing problem given some fluence y
     def solvePP(self, y):
         # calc gradient
         grad = self.evalGrad(y)
@@ -108,13 +110,15 @@ class cgSolver:
         # add aperture to model
         return self.addAper(lBest, rBest)  # rE is non-inclusive
 
+    #Run full solution methodology for CG - iterate between PP and RMP
     def solve(self, aperMax):
         self.aperMax = aperMax
         while self.nY < self.aperMax:
-            lPos,rPos = self.solvePP(self.y)
+            self.solvePP(self.y)
             self.solveRMP()
             #print 'Aperures {} of {} added, lPos: {}, rPos: {}, Obj: {}'.format(str(np.size(self.y)), str(self.aperMax), lPos, rPos,str(self.obj))
 
+    # generates next line of D-matrix given left and right leaf positions
     def addAper(self, l, r):
         # calculate col of D, add to sparse matrix using error function...make midpoint then write out function...truncate at very small
         # calc Dcol along entire axis, then truncate
@@ -140,6 +144,7 @@ class cgSolver:
         self.nY +=1
         return self.approxPoints[l], self.approxPoints[r - 1]
 
+    #solves restricted master problem
     def solveRMP(self):
         # todo build in upper bounds on fluence
         self.res = spo.minimize(self.calcObjGrad, x0=self.y.copy(), method='L-BFGS-B', jac=True,
@@ -148,7 +153,7 @@ class cgSolver:
         self.y = self.res['x']
         self.obj = self.res['fun']
 
-
+    # builds input vector for explicit model
     def getErfInput(self):
         # initialize return vector
         K = np.size(self.y)
@@ -162,6 +167,7 @@ class cgSolver:
 
         return erfInputVector
 
+    #saves to a matlab file
     def output(self, filename):
         io.savemat(self.runTag + '_' + filename, {'y': self.y, 'l': self.lVec,
                               'r': self.rVec, 'obj': self.obj,
@@ -216,5 +222,6 @@ class cgSolver:
                 plt.show()
             else:
                 plt.show(block = False)
+
     def closePlots(self):
         plt.close('all')

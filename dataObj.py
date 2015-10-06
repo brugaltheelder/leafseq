@@ -3,6 +3,7 @@ __author__ = 's162195'
 import numpy as np
 
 
+# object holds core data for the explicit model
 class dataObj():
     def __init__(self, objParams, res, K, sigma, width, alphas, aperParams, runTag):
         self.objParams = objParams  # list of objective parameters [ci, bi for sin]

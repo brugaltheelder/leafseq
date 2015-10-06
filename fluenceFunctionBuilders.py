@@ -5,7 +5,7 @@ import scipy.special as sps
 import matplotlib.pyplot as plt
 
 
-
+# builds target fluences
 class functionGetter:
     def __init__(self, UpperRange, Resolution):
         self.fig = plt.figure()
