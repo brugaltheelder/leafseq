@@ -27,6 +27,14 @@ class functionGetter:
         print np.min(g[g>0])
         return g
 
+    def doubleSinfunction(self, a, b, c, d, h):
+        return a * np.sin(b * self.approxPoints) + c * np.sin(d * self.approxPoints) + h
+
+    def unitStep(self, nBeamlets, minFlu, maxFlu, order):
+        import scipy.ndimage as spn
+        ycoarse = minFlu + (maxFlu - minFlu) * np.random.rand(nBeamlets)
+        return spn.zoom(ycoarse, order=order, zoom=1. * self.nApprox / nBeamlets)
+
     def sinFunction(self, a, b):
         return np.sin(b * self.approxPoints) + a
 

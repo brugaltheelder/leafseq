@@ -44,8 +44,8 @@ class paramTesting:
         self.obj = []
         self.paramList = []
         self.runTimes = []
-        self.totalMUs = [] \
- \
+        self.totalMUs = []
+
     def addParam(self, pName, pValues):
         self.paramName.append(pName)
         self.paramValues.append(pValues)

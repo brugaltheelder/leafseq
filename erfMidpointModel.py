@@ -188,7 +188,7 @@ class erfMidModel:
         plt.plot(self.approxPoints, self.fTarget, 'r')
 
         # Sets coherent limits to plot
-        plt.ylim(0, 1.2 * max(np.max(self.finalX[0:self.K]), self.sinGap + 1))
+        plt.ylim(0, 1.2 * max(np.max(self.finalX[0:self.K]), np.max(self.fTarget)))
         plt.xlim(0, self.width)
 
         g = np.zeros(self.numApproxPoints)
