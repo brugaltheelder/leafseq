@@ -65,8 +65,8 @@ minAperEdgeGap = 0.
 
 
 # Generate data vectors - random step
-outfilename, order = 'stepFunctionOutOrder0.mat', 0
-# outfilename, order = 'stepFunctionOutOrder2.mat',2
+# outfilename, order = 'stepFunctionOutOrder0.mat', 0
+outfilename, order = 'stepFunctionOutOrder2.mat', 2
 kParam = np.arange(5, 45 + 1, 5)
 cParam = np.arange(5, 15 + 1, 5)
 bParam = np.arange(3., 6 + 1, 1)

@@ -96,7 +96,7 @@ class cgSolver:
     def solvePP(self, y):
         # calc gradient
         grad = self.evalGrad(y)
-
+        lBest, rBest = -1, -1
         # do search
         # helper variables
         maxSoFar, maxEndingHere, lE, rE = 0, 0, 0, 0
@@ -108,7 +108,10 @@ class cgSolver:
                 maxSoFar, rE = maxEndingHere, i + 1
                 lBest, rBest = lE, rE
         # add aperture to model
-        return self.addAper(lBest, rBest)  # rE is non-inclusive
+        if lBest == -1 and rBest == -1:
+            return self.addAper(0, 0)
+        else:
+            return self.addAper(lBest, rBest)  # rE is non-inclusive
 
     #Run full solution methodology for CG - iterate between PP and RMP
     def solve(self, aperMax):
@@ -214,7 +217,7 @@ class cgSolver:
                 plt.savefig('CGiterPlotOut_' + str(self.figCounter) + '_.png')
                 self.figCounter += 1
         else:
-            plt.title('Method: CG, obj: ' + str(round(self.obj, 5)) + ', nAper: ' + str(np.size(self.y)))
+            plt.title('Method: CG, obj: ' + str(round(self.finalObjEval(), 5)) + ', nAper: ' + str(np.size(self.y)))
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
             plt.savefig(self.runTag + '_' + self.plotTag + '.png')
