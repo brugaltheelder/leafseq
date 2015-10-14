@@ -22,6 +22,7 @@ class erfMidModel:
         self.sinGap, self.sigma, self.sinScalar = 1.0 * runData.objParams[0], 1.0 * runData.sigma, 1.0 * \
                                                   runData.objParams[
                                                       1]  # shift for sin obj, scacling factor for erf, sin scaling factor
+        self.directory = runData.directory
         self.minAperWidth, self.maxAperWidth, self.aperCenterOffset = runData.minAperWidth, runData.maxAperWidth, runData.aperCenterOffset  # min/max bounds for aper width, aper center offset from edges
         self.runTag = runData.runTag
         self.objCalls = 0
@@ -223,13 +224,13 @@ class erfMidModel:
         if ongoingfig:
             plt.draw()
             if self.realTimePlotSaving:
-                plt.savefig(self.runTag + '_ERFiterPlotOut_' + str(self.figCounter) + '.png')
+                plt.savefig(self.directory + '/' + self.runTag + '_ERFiterPlotOut_' + str(self.figCounter) + '.png')
                 self.figCounter += 1
         else:
             plt.title('Method: ERF, obj: ' + str(round(self.obj, 5)) + ', nAper: ' + str(self.K))
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
-            plt.savefig(self.runTag + '_' + self.plotTag + '.png')
+            plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
             if finalShow:
                 plt.show()
             else:
@@ -242,7 +243,7 @@ class erfMidModel:
 
     # outputs values to a .mat file incase of MATLAB integration
     def output(self, filename):
-        io.savemat(self.runTag + '_' + filename, {'y': self.finalX[0:self.K], 'm': self.finalX[self.K:2 * self.K],
+        io.savemat(self.directory + '/' + self.runTag + '_' + filename, {'y': self.finalX[0:self.K], 'm': self.finalX[self.K:2 * self.K],
                               'a': self.finalX[2 * self.K:3 * self.K], 'obj': self.obj,
                               'sinGap': self.sinGap, 'K': self.K, 'width': self.width,
                               'numApprox': self.numApproxPoints, 'sinScalar': self.sinScalar, 'sigma': self.sigma,

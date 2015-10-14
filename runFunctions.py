@@ -16,8 +16,8 @@ def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, fi
     mod.output(outputName)
     if closePlots:
         mod.closePlots()
-    #print 'bestObj', mod.obj
-    return mod.obj, np.sum(mod.varArray[0:mod.K])
+    
+    return mod.obj, np.sum(mod.finalX[0:mod.K])
 
 
 def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False, outputName='out.mat', closePlots=False,
@@ -26,7 +26,7 @@ def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False, o
                    displayFreq=dispFreq, plotTag=pTag, simpleG=simpG)
     mod.solve(data.numAper)
     mod.printSolution(finalShow=finalShow)
-    mod.output(outputName)
+    mod.output(outputName)    
     if closePlots:
         mod.closePlots()
     #print 'bestObj', mod.obj

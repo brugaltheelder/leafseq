@@ -9,8 +9,8 @@ except ImportError:
     have_mkl = False
     print("Running with normal backends")
 
-# import matplotlib
-# matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 import time
 
 import numpy as np
@@ -67,12 +67,13 @@ fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
 # obj, erfInputVec = runcg(dat, RTplot=False, trueF=fErfVec)
 # print runcg(dat, RTplot=False, trueF=fErfVec)
 obj, erfInputVec, mus, poorobj = runcg(dat, RTplot=False, simpG=True, trueF=fErfVec)
-print obj, poorobj
+print obj, poorobj, mus
 
 
 start = time.time()
 # print runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True, startVec=erfInputVec)
-print runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec)
+obj,Mus = runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec)
+print obj, Mus
 print 'finished in {} seconds'.format(str(time.time()-start))
 #runerf(dat, ['unifcent', 2], RTplot=True, finalShow=True, trueFlu=fErfVec )
 

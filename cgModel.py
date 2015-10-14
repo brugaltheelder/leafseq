@@ -19,6 +19,7 @@ class cgSolver:
         self.sinGap, self.sigma, self.sinScalar = 1.0 * runData.objParams[0], 1.0 * runData.sigma, 1.0 * \
                                                   runData.objParams[
                                                       1]  # shift for sin obj, scacling factor for erf, sin scaling factor
+        self.directory = runData.directory                                                      
         self.runTag = runData.runTag
         self.objCalls = 0
         self.displayFreq = displayFreq
@@ -172,7 +173,7 @@ class cgSolver:
 
     #saves to a matlab file
     def output(self, filename):
-        io.savemat(self.runTag + '_' + filename, {'y': self.y, 'l': self.lVec,
+        io.savemat(self.directory + '/'+self.runTag + '_' + filename, {'y': self.y, 'l': self.lVec,
                               'r': self.rVec, 'obj': self.obj,
                               'sinGap': self.sinGap, 'K': self.K, 'width': self.width,
                               'numApprox': self.nApprox, 'sinScalar': self.sinScalar, 'sigma': self.sigma,
@@ -214,13 +215,13 @@ class cgSolver:
         if ongoingfig:
             plt.draw()
             if self.realTimePlotSaving:
-                plt.savefig('CGiterPlotOut_' + str(self.figCounter) + '_.png')
+                plt.savefig(self.directory + '/' + 'CGiterPlotOut_' + str(self.figCounter) + '_.png')
                 self.figCounter += 1
         else:
             plt.title('Method: CG, obj: ' + str(round(self.finalObjEval(), 5)) + ', nAper: ' + str(np.size(self.y)))
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
-            plt.savefig(self.runTag + '_' + self.plotTag + '.png')
+            plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
             if finalShow:
                 plt.show()
             else:
