@@ -29,6 +29,8 @@ b = 4 / math.sqrt(width)
 c = 3.
 alphas = np.ones(int(width / res + 1))
 
+directory = 'testout'
+
 
 # data testing for 2-aper ERF objective
 # res = 0.01
@@ -43,7 +45,7 @@ alphas = np.ones(int(width / res + 1))
 
 #dat = dataObj([c, b], res, numAper, sigma, width, alphas, [0, width / 2., 0], 'TestRun')
 #dat = dataObj([c, b], res, numAper, sigma, width, alphas, [2. / width, width / 2., 1. / width], 'TestRun')
-dat = dataObj([c, b], res, numAper, sigma, width, alphas, [0., width , 0.], 'TestRun')
+dat = dataObj([c, b], res, numAper, sigma, width, alphas, [0., width , 0.], 'TestRun', directory)
 
 fGetter = functionGetter(width, res)
 y = np.array([1,1])
@@ -72,7 +74,8 @@ print obj, poorobj, mus
 
 start = time.time()
 # print runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True, startVec=erfInputVec)
-obj,Mus = runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec)
+#obj,Mus = runerf(dat, ['random', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec)
+obj,Mus = runerf(dat, ['centered', 2], RTplot=False, finalShow=True, trueFlu=fErfVec, plotSeed = True)
 print obj, Mus
 print 'finished in {} seconds'.format(str(time.time()-start))
 #runerf(dat, ['unifcent', 2], RTplot=True, finalShow=True, trueFlu=fErfVec )

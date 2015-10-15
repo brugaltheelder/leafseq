@@ -7,10 +7,10 @@ import math
 from itertools import product
 
 
-def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None, outputName='out.mat', closePlots = False, dispFreq = False, pTag = ''):
+def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None, outputName='out.mat', closePlots = False, dispFreq = False, pTag = '', plotSeed = False):
     mod = erfMidModel(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving,
                       initializationStringAndParams=initParams, startingSolutionVector=startVec,
-                      trueFluenceVector=trueFlu, displayFreq=dispFreq, plotTag=pTag)
+                      trueFluenceVector=trueFlu, displayFreq=dispFreq, plotTag=pTag, plotSeed = plotSeed)
     mod.solve()
     mod.plotSolution(finalShow=finalShow)
     mod.output(outputName)

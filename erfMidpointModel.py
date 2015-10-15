@@ -13,7 +13,7 @@ from dataObj import *
 class erfMidModel:
     # class initialization
     def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, startingSolutionVector=None,
-                 trueFluenceVector=None, initializationStringAndParams=None, displayFreq = False, plotTag = ''):
+                 trueFluenceVector=None, initializationStringAndParams=None, displayFreq = False, plotTag = '', plotSeed = False):
 
         # Read in parameters
         assert (isinstance(runData, dataObj))
@@ -25,6 +25,7 @@ class erfMidModel:
         self.directory = runData.directory
         self.minAperWidth, self.maxAperWidth, self.aperCenterOffset = runData.minAperWidth, runData.maxAperWidth, runData.aperCenterOffset  # min/max bounds for aper width, aper center offset from edges
         self.runTag = runData.runTag
+        self.plotSeed = plotSeed
         self.objCalls = 0
         self.displayFreq = displayFreq
         self.plotTag = plotTag
@@ -68,6 +69,19 @@ class erfMidModel:
             self.initializeVarsUniformWidth()
         elif initializationStringAndParams[0] == 'unifmixed':
             self.initializeVarsUniformMixed(initializationStringAndParams[1])
+        elif initializationStringAndParams[0] == 'random':
+            m,a = self.initializeVarsRandom()            
+            y = self.getY(m,a)
+            self.setVarArray(y,m,a)
+        elif initializationStringAndParams[0] == 'slidingwindow':
+            m,a = self.initializeVarsSW()            
+            y = self.getY(m,a)
+            self.setVarArray(y,m,a)
+        elif initializationStringAndParams[0] == 'centered':
+            m,a = self.initializeVarsCentered()            
+            y = self.getY(m,a)
+            y = np.ones(self.K) * y.sum()/self.K
+            self.setVarArray(y,m,a)
         else:
             self.initializeVarsUniformMixed(2)
 
@@ -78,6 +92,55 @@ class erfMidModel:
             self.figCounter = 0
             plt.ion()
             plt.show()
+
+    def setVarArray(self,y,m,a):
+        self.varArray[0:self.K] = y.copy()        
+        self.varArray[self.K:2 * self.K] = m.copy()        
+        self.varArray[2 * self.K:3 * self.K] = a.copy()
+        self.seedY, self.seedM, self.seedA = y.copy(), m.copy(), a.copy()
+
+
+    def getY(self,m,a):
+        y = np.zeros(self.K)       
+        # get l,r
+        l = np.maximum(0,np.round(1.0*self.numApproxPoints/self.width*(m-a),0))
+        r = np.minimum(self.numApproxPoints-1,np.round(1.0*self.numApproxPoints/self.width*(m+a),0))
+        
+        # build D
+        self.seedD = np.zeros((self.numApproxPoints, self.K))
+        for k in range(self.K):
+            self.seedD[l[k]:r[k],k] = 1        
+
+        #solve for y
+        seedRes = spo.minimize(self.seedCalcObjGrad, x0 = y.copy(), method = 'L-BFGS-B',jac = True, bounds = np.array([(0,None) for i in range(self.K)]), options = {'ftol':1e-6, 'disp': self.displayFreq})
+
+        return seedRes['x']
+
+
+    #calculates seed obj and grad
+    def seedCalcObjGrad(self,y):
+        diff = self.fTarget - self.seedD.dot(y)
+        return np.sum(self.alphas * (diff ** 2)), self.seedD.transpose().dot(-2. * self.alphas * diff)
+
+
+
+    def initializeVarsRandom(self):
+        m = np.random.rand(self.K) * self.width
+        a = np.random.rand(self.K) * self.width / 2.0
+        return m,a        
+
+    def initializeVarsSW(self):
+        m = np.array([1.0*(k*self.width)/(self.K+1) for k in range(1,self.K+1)])
+        a = np.array([1.0*self.width/self.K for k in range(self.K)])
+        return m,a
+
+    def initializeVarsCentered(self):
+        m = np.array([1.0*self.width/2 for k in range(self.K)])
+        m = self.width * (np.random.rand(self.K)-0.5)/2.0 + self.width/2.0
+        a = np.array([1.0*(1.0* k*self.width)/(2.0*(self.K+1)) for k in range(1,self.K+1)])
+
+        return m,a
+
 
     # calculates derivative of erf
     def derf(self, x):
@@ -220,6 +283,20 @@ class erfMidModel:
                 sps.erfc(
                     (self.approxPoints[idx] - (self.finalX[self.K + k] + self.finalX[2 * self.K + k])) / self.sigma)),
                      'b')
+        if self.plotSeed:
+            for k in range(self.K):
+            # plot left error function up to center
+
+                idx = self.approxPoints <= self.seedM[k]
+                plt.plot(self.approxPoints[idx], self.seedY[k] * 1./2. * (1 + sps.erf(
+                    (self.approxPoints[idx] - (self.seedM[k] - self.seedA[k])) / self.sigma)), 'y')
+                # plot right error function
+                idx = self.approxPoints > self.seedM[k]
+                plt.plot(self.approxPoints[idx], self.seedY[k] / 2. * (
+                    sps.erfc(
+                        (self.approxPoints[idx] - (self.seedM[k] + self.seedA[k])) / self.sigma)),
+                         'y')
+
         # updates figure
         if ongoingfig:
             plt.draw()

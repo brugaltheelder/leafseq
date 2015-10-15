@@ -153,7 +153,7 @@ class cgSolver:
         # todo build in upper bounds on fluence
         self.res = spo.minimize(self.calcObjGrad, x0=self.y.copy(), method='L-BFGS-B', jac=True,
                                 bounds=np.array([(0, None) for i in range(np.size(self.y))]),
-                                options={'ftol': 1e-8, 'disp': self.displayFreq})
+                                options={'ftol': 1e-6, 'disp': self.displayFreq})
         self.y = self.res['x']
         self.obj = self.res['fun']
 
