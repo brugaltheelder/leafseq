@@ -22,7 +22,7 @@ from fluenceFunctionBuilders import *
 
 # #data testing for CG + Explicit models
 res = 0.01
-numAper = 15
+numAper = 3
 sigma = 0.075
 width = 10.
 b = 4 / math.sqrt(width)
@@ -60,9 +60,10 @@ a = np.array([width/3, width/6])
 # runerf(dat, ['unifmixed', 2], RTplot=False, startVec=erfInputVec, finalShow=True)
 
 #fErfVec = fGetter.erfSum(y,m,a,sigma, truncate=0.0)
-# fErfVec = fGetter.sinFunction(c,b)
+#fErfVec = fGetter.sinFunction(c,b)
 # fErfVec = fGetter.unitStep(10, 4, 7, 2)
-fErfVec = fGetter.doubleSinfunction(1., 1., 1. / 3., 4., 4)
+#fErfVec = fGetter.doubleSinfunction(1., 1., 1. / 3., 4., 4)
+fErfVec = fGetter.erfSumRand(numAper, 0.5, 0.5, sigma, width)
 
 fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
 #erfInputVec = np.zeros(3*dat.numAper)
@@ -74,8 +75,8 @@ print obj, poorobj, mus
 
 start = time.time()
 # print runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True, startVec=erfInputVec)
-#obj,Mus = runerf(dat, ['random', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec)
-obj,Mus = runerf(dat, ['centered', 2], RTplot=False, finalShow=True, trueFlu=fErfVec, plotSeed = True)
+obj,Mus = runerf(dat, ['random', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec, plotSeed=True)
+#obj,Mus = runerf(dat, ['peaks', 2], RTplot=False, finalShow=True, trueFlu=fErfVec, plotSeed = True)
 print obj, Mus
 print 'finished in {} seconds'.format(str(time.time()-start))
 #runerf(dat, ['unifcent', 2], RTplot=True, finalShow=True, trueFlu=fErfVec )

@@ -3,6 +3,7 @@ __author__ = 'Troy Long'
 import numpy as np
 import scipy.optimize as spo
 import scipy.special as sps
+import scipy.signal as spsignal
 from scipy import io
 # import matplotlib
 # matplotlib.use('Agg')
@@ -63,6 +64,9 @@ class erfMidModel:
         # initialize solution vector
         if startingSolutionVector is not None and len(self.varArray) == len(startingSolutionVector):
             self.varArray = np.copy(startingSolutionVector)
+            self.seedY = np.copy(startingSolutionVector[0:self.K])
+            self.seedM = np.copy(startingSolutionVector[self.K:2*self.K])
+            self.seedA = np.copy(startingSolutionVector[2*self.K:3*self.K])
         elif initializationStringAndParams[0] == 'unifcent':
             self.initializeVarsUniformCenter()
         elif initializationStringAndParams[0] == 'unifwidth':
@@ -82,6 +86,10 @@ class erfMidModel:
             y = self.getY(m,a)
             y = np.ones(self.K) * y.sum()/self.K
             self.setVarArray(y,m,a)
+        elif initializationStringAndParams[0] == 'peaks':
+            m,a = self.initializeVarsPeaks()
+            y = self.getY(m, a)
+            self.setVarArray(y, m, a)
         else:
             self.initializeVarsUniformMixed(2)
 
@@ -138,8 +146,25 @@ class erfMidModel:
         m = np.array([1.0*self.width/2 for k in range(self.K)])
         m = self.width * (np.random.rand(self.K)-0.5)/2.0 + self.width/2.0
         a = np.array([1.0*(1.0* k*self.width)/(2.0*(self.K+1)) for k in range(1,self.K+1)])
-
         return m,a
+
+    def initializeVarsPeaks(self):
+        m,a = [self.width/2],[self.width/2]
+        peaks = spsignal.find_peaks_cwt(self.fTarget, np.arange(10,20))    
+        nPeaks= len(peaks)
+        nAperPerPeak = int(np.floor(1.0*(self.K-1)/nPeaks))
+
+        for kp in range(nAperPerPeak):
+            for p in range(nPeaks):
+                m.append(self.width*peaks[p]/self.numApproxPoints)
+                a.append(1.0*(kp+1)*nPeaks/self.K)
+
+        while len(m)<self.K:
+            m.append(self.width/2)
+            a.append(self.width/4 + 2.0*(np.random.rand(1)-0.5)*self.width/4)
+
+        return np.array(m[:self.K]), np.array(a[:self.K])
+
 
 
     # calculates derivative of erf
@@ -283,19 +308,7 @@ class erfMidModel:
                 sps.erfc(
                     (self.approxPoints[idx] - (self.finalX[self.K + k] + self.finalX[2 * self.K + k])) / self.sigma)),
                      'b')
-        if self.plotSeed:
-            for k in range(self.K):
-            # plot left error function up to center
 
-                idx = self.approxPoints <= self.seedM[k]
-                plt.plot(self.approxPoints[idx], self.seedY[k] * 1./2. * (1 + sps.erf(
-                    (self.approxPoints[idx] - (self.seedM[k] - self.seedA[k])) / self.sigma)), 'y')
-                # plot right error function
-                idx = self.approxPoints > self.seedM[k]
-                plt.plot(self.approxPoints[idx], self.seedY[k] / 2. * (
-                    sps.erfc(
-                        (self.approxPoints[idx] - (self.seedM[k] + self.seedA[k])) / self.sigma)),
-                         'y')
 
         # updates figure
         if ongoingfig:
@@ -308,6 +321,22 @@ class erfMidModel:
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
             plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
+            if self.plotSeed:
+                for k in range(self.K):
+                # plot left error function up to center
+
+                    idx = self.approxPoints <= self.seedM[k]
+                    plt.plot(self.approxPoints[idx], self.seedY[k] * 1./2. * (1 + sps.erf(
+                        (self.approxPoints[idx] - (self.seedM[k] - self.seedA[k])) / self.sigma)), 'y')
+                    # plot right error function
+                    idx = self.approxPoints > self.seedM[k]
+                    plt.plot(self.approxPoints[idx], self.seedY[k] / 2. * (
+                        sps.erfc(
+                            (self.approxPoints[idx] - (self.seedM[k] + self.seedA[k])) / self.sigma)),
+                             'y')
+
+                plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '_withSeed.png')
+
             if finalShow:
                 plt.show()
             else:

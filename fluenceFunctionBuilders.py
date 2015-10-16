@@ -23,8 +23,17 @@ class functionGetter:
             # case with approx[i] > m_k (center to left of approx point)
             idx = m < self.approxPoints[i]
             g[i] += np.sum(y[idx] * (sps.erfc((self.approxPoints[i] - (m[idx] + a[idx])) / sigma)))
+        g[g<truncate] = 0        
+        return g
+
+
+    def erfSumRand(self,nApers, centerPosScalar, widthScalar, sigma,  width, truncate = 0 ):
+        g = np.zeros(self.nApprox)
+        for k in range(nApers):
+            center = width/2.0 + 2.*(np.random.rand(1)-0.5) * width/2.0 * centerPosScalar
+            aperWidth = width/4.0 + 2.*(np.random.rand(1)-0.5) * width/4.0 * widthScalar
+            g+=1.0 * np.random.randint(1,4) * ((sps.erf((self.approxPoints-(center - aperWidth))/sigma) + sps.erfc((self.approxPoints-(center + aperWidth))/sigma) - 1))            
         g[g<truncate] = 0
-        print np.min(g[g>0])
         return g
 
     def doubleSinfunction(self, a, b, c, d, h):
