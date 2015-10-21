@@ -48,17 +48,17 @@ minAperEdgeGap = 0.
 
 
 # Generate data vectors - sin
-# outfilename = 'sinout.mat'
-# directory = 'singlesin'
-# kParam = np.arange(10, 40 + 1, 5)
-# cParam = np.arange(2,5+1, 3)
-# bParam = np.arange(1./width, 13./width+1./width, 3./width)
-# print kParam, cParam, bParam
-# params = paramTesting()
-# params.addParam('maxAper',kParam.tolist())
-# params.addParam('sinOffset',cParam.tolist())
-# params.addParam('sinScalar',bParam.tolist())
-# params.genCombination()
+outfilename = 'sinout.mat'
+directory = 'singlesin'
+kParam = np.arange(10, 40 + 1, 5)
+cParam = np.arange(2,5+1, 3)
+bParam = np.arange(1./width, 13./width+1./width, 3./width)
+print kParam, cParam, bParam
+params = paramTesting()
+params.addParam('maxAper',kParam.tolist())
+params.addParam('sinOffset',cParam.tolist())
+params.addParam('sinScalar',bParam.tolist())
+params.genCombination()
 
 
 # Generate data vectors - double sin
@@ -76,22 +76,22 @@ minAperEdgeGap = 0.
 
 
 # Generate data vectors - sum of erfs
-outfilename = 'erfsout.mat'
-directory = 'erfs'
-kParam = np.arange(3, 15 + 1, 3) 
-cParam = np.arange(0.0,1.+0.1, 0.5)
-bParam = np.arange(0.0,1.+0.1, 0.5)
-params = paramTesting()
-params.addParam('nAper',kParam.tolist())
-params.addParam('centerScalar',cParam.tolist())
-params.addParam('widthScalar',bParam.tolist())
-params.genCombination()
-print kParam, cParam, bParam
+# outfilename = 'erfsout.mat'
+# directory = 'erfs'
+# kParam = np.arange(3, 15 + 1, 3) 
+# cParam = np.arange(0.0,1.+0.1, 0.5)
+# bParam = np.arange(0.0,1.+0.1, 0.5)
+# params = paramTesting()
+# params.addParam('nAper',kParam.tolist())
+# params.addParam('centerScalar',cParam.tolist())
+# params.addParam('widthScalar',bParam.tolist())
+# params.genCombination()
+# print kParam, cParam, bParam
 
 
 # Generate data vectors - random step
-# outfilename, order, directory = 'stepFunctionOutOrder0.mat', 0, 'stepOrder0' 
-# # outfilename, order, directory = 'stepFunctionOutOrder2.mat', 2, 'stepOrder2'
+# # outfilename, order, directory = 'stepFunctionOutOrder0.mat', 0, 'stepOrder0' 
+# outfilename, order, directory = 'stepFunctionOutOrder2.mat', 2, 'stepOrder2'
 # kParam = np.arange(10, 40 + 1, 5)
 # cParam = np.arange(5, 15 + 1, 5)
 # bParam = np.arange(3., 6 + 1, 1)
@@ -116,11 +116,11 @@ for kInd, cInd, bInd in params.combination:
     # fVec = fGetter.doubleSinfunction(1.,1.,bP, cP,4.)
 
 
-    #single sine
-    # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
-    # runName = params.getFilename(kInd, cInd, bInd)
-    # dat = dataObj([cP, bP], res, kP, sigma, width, alphas,[minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
-    # fVec = fGetter.sinFunction(cP,bP)
+    # single sine
+    kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
+    runName = params.getFilename(kInd, cInd, bInd)
+    dat = dataObj([cP, bP], res, kP, sigma, width, alphas,[minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
+    fVec = fGetter.sinFunction(cP,bP)
 
     # random step
     # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
@@ -129,10 +129,10 @@ for kInd, cInd, bInd in params.combination:
     # fVec = fGetter.unitStep(cP, bP, 7., order=order)
 
     #erf functions
-    kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
-    runName = params.getFilename(kInd, cInd, bInd)
-    dat = dataObj([0, 0], res, kP, sigma, width, alphas, [minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
-    fVec = fGetter.erfSumRand(kP, cP, bP, sigma, width)    
+    # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
+    # runName = params.getFilename(kInd, cInd, bInd)
+    # dat = dataObj([0, 0], res, kP, sigma, width, alphas, [minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
+    # fVec = fGetter.erfSumRand(kP, cP, bP, sigma, width)    
 
 
     iterObj = []
@@ -143,7 +143,7 @@ for kInd, cInd, bInd in params.combination:
     # random
     start = time.time()
     obj, MUs = runerf(dat, ['random', 3], RTplot=False, finalShow=False, outputName='random_out.mat',
-                      closePlots=True, pTag='unifcent', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, pTag='random', trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
@@ -151,7 +151,7 @@ for kInd, cInd, bInd in params.combination:
     # sliding window
     start = time.time()
     obj, MUs = runerf(dat, ['slidingwindow', 3], RTplot=False, finalShow=False, outputName='slidingwindow_out.mat',
-                      closePlots=True, pTag='unifwidth', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, pTag='slidingwindow', trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
@@ -159,7 +159,7 @@ for kInd, cInd, bInd in params.combination:
     # centered
     start = time.time()
     obj, MUs = runerf(dat, ['centered', 3], RTplot=False, finalShow=False, outputName='centered_out.mat',
-                      closePlots=True, pTag='unifmixed', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, pTag='centered', trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
@@ -167,15 +167,15 @@ for kInd, cInd, bInd in params.combination:
     # peaks
     start = time.time()
     obj, MUs = runerf(dat, ['peaks', 3], RTplot=False, finalShow=False, outputName='peaks_out.mat',
-                      closePlots=True, pTag='unifmixed', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, pTag='peaks', trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
 
     # run CG
     start = time.time()
-    obj, erfInputVec, MUs, otherObj = runcg(dat, RTplot=False, finalShow=False, outputName='cg_out.mat',
-                                            closePlots=True, pTag='cg', trueF=fVec)
+    obj, erfInputVec, MUs, otherObj = runcg(dat, RTplot=False, finalShow=False, outputName='cgseed_out.mat',
+                                            closePlots=True, pTag='cgseed', trueF=fVec)
     iterMUs.append(MUs)
     iterObj.append(obj)
     iterRunTime.append(time.time() - start)
@@ -183,16 +183,16 @@ for kInd, cInd, bInd in params.combination:
 
     # run explicit based on cg
     start = time.time()
-    obj, MUs = runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cgSeeded_out.mat',
-                      closePlots=True, startVec=erfInputVec, pTag='cgSeeded', trueFlu=fVec, plotSeed=True)
+    obj, MUs = runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cg_out.mat',
+                      closePlots=True, startVec=erfInputVec, pTag='cg', trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
 
     # run CG with simple objective
     start = time.time()
-    obj, erfInputVec, MUs, otherObj = runcg(dat, RTplot=False, finalShow=False, outputName='cgSimp_out.mat',
-                                            closePlots=True, pTag='cgSimp', simpG=True, trueF=fVec)
+    obj, erfInputVec, MUs, otherObj = runcg(dat, RTplot=False, finalShow=False, outputName='cgsimpseed_out.mat',
+                                            closePlots=True, pTag='cgsimpseed', simpG=True, trueF=fVec)
     iterMUs.append(MUs)
     iterObj.append(obj)
     iterRunTime.append(time.time() - start)
@@ -200,8 +200,8 @@ for kInd, cInd, bInd in params.combination:
     # run explicit based on cg with simple objective
     # run explicit based on cg
     start = time.time()
-    obj, MUs = runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cgSimpSeeded_out.mat',
-                      closePlots=True, startVec=erfInputVec, pTag='cgSimpSeeded', trueFlu=fVec, plotSeed=True)
+    obj, MUs = runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cgsimp_out.mat',
+                      closePlots=True, startVec=erfInputVec, pTag='cgsimp', trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
