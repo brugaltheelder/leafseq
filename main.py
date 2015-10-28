@@ -9,15 +9,15 @@ except ImportError:
     have_mkl = False
     print("Running with normal backends")
 
-import matplotlib
-matplotlib.use('Agg')
+# import matplotlib
+# matplotlib.use('Agg')
 import time
 
 import numpy as np
 
 from runFunctions import *
 from fluenceFunctionBuilders import *
-
+from stratGreedy import *
 
 
 # #data testing for CG + Explicit models
@@ -61,10 +61,17 @@ a = np.array([width/3, width/6])
 
 #fErfVec = fGetter.erfSum(y,m,a,sigma, truncate=0.0)
 #fErfVec = fGetter.sinFunction(c,b)
-# fErfVec = fGetter.unitStep(10, 4, 7, 2)
+fErfVec = fGetter.unitStep(10, 4, 7, 2)
 #fErfVec = fGetter.doubleSinfunction(1., 1., 1. / 3., 4., 4)
-fErfVec = fGetter.erfSumRand(numAper, 0.5, 0.5, sigma, width)
+#fErfVec = fGetter.erfSumRand(numAper, 0.5, 0.5, sigma, width)
 
+
+stratifiedGreedy = stratGreedy(fErfVec, 10, width)
+y,m,a,k = stratifiedGreedy.runStratGreedy(10)
+stratifiedGreedy.plotStrat(y, m, a)
+
+
+exit()
 fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
 #erfInputVec = np.zeros(3*dat.numAper)
 # obj, erfInputVec = runcg(dat, RTplot=False, trueF=fErfVec)
