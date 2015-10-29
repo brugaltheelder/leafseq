@@ -1,68 +1,176 @@
+"""
+Created on 29 October 2015
+@author: Troy Long
+"""
+
+
 import numpy as np
 import scipy.cluster as spc
 import matplotlib.pyplot as plt
 import warnings
+import scipy.special as sps
+from scipy import io
 
 warnings.filterwarnings('ignore','.*different initialization.*')
 
 class stratGreedy(object):
-	"""Greedy clinically-based leaf sequencing solver"""
-	def __init__(self, f,L,width,K=None):
-		self.f, self.L, self.K = f, L,None
-		self.width = width
-		self.M = self.f.shape[0]
-		self.eps = 0.001
-		if bool(K):
-			self.K = K
-		self.y, self.m, self.a = [], [],[]
+    """Greedy clinically-based leaf sequencing solver"""
 
-	def runStratGreedy(self,L=None):
-		if not bool(L):
-			L = self.L
-		# stratify levels
-		levels,ind = spc.vq.kmeans2(self.f, L)
-		f_strat = levels[ind]
-		self.f_strat_latest = np.copy(f_strat)
-		y,m,a = [],[],[]
-		l,r = [],[]
-		gradMask = np.zeros(f_strat.shape)
-		# run iterative approach
-		while f_strat.max()>self.eps:
-			# find widest opening using CG pricing problem
-			# find "gradient" by finding non-neg indices
-			gradMask[:] = f_strat.shape[0]+1
-			gradMask[f_strat>self.eps] = -1
+    def __init__(self, f,L, runData, K=None, plotTag = 'clinGreed'):
+        """ Initializes inputs"""
+        self.f, self.L, self.K = f, L,None
+        self.Linit = self.L
+        self.width, self.sigma = 1.0* runData.width, 1.0* runData.sigma
+        self.M = self.f.shape[0]
+        self.directory = runData.directory
+        self.runTag = runData.runTag
+        self.plotTag = plotTag
+        self.eps = 0.001
+        self.approxPoints = np.arange(0,self.width+(1.0*self.width)/(self.M-1),1.0*self.width/(self.M-1))
+        if bool(K):
+            self.K = K
+        self.alphas = np.copy(runData.alphas)       
+        
 
-			# run pricing problem
-			lBest,rBest = -1, -1
-			maxSoFar,maxEndingHere, lE, rE = 0,0,0,0
-			for i in range(f_strat.shape[0]):
-				maxEndingHere+=gradMask[i]
-				if maxEndingHere>=0:
-					maxEndingHere,lE,rE = 0,i+1,i+1
-				if maxSoFar>maxEndingHere:
-					maxSoFar,rE = maxEndingHere,i+1
-					lBest,rBest = lE,rE
-			# add best block
-			if lBest ==-1 and rBest ==-1:
-				print 'error in the runStratGreedy algorithm'
-			else:
-				y.append(f_strat[lBest:rBest].min())
-				l.append(lBest)
-				r.append(rBest)
-				f_strat[lBest:rBest]-= f_strat[lBest:rBest].min()
+    def runClinicalReturnErfSeed(self):
+        '''
+        This is the main run function that runs the full algorithm and returns the seed and objective. This calls **self.runStratGreedy**. 
 
-		#generate m,a
-		numK = len(y)
-		m = [0.5*(r[i] + l[i])*self.width/self.M for i in range(numK)]
-		a = [0.5*(r[i] - l[i])*self.width/self.M for i in range(numK)]
+        If a K is given, the algorithm will try to match that K. It builds up L then does a binary search along L to get close to K until K is reached or the binary search step is 1.
+        '''
+        self.Kout = 0
+        if self.K is None:
+            self.Kout = self.runStratGreedy()
+            return self.getErfInput(), self.getObj(), self.Kout
+        
+        #initialize starting L
+        self.Kout = self.runStratGreedy(self.L)
+        while self.Kout<self.K:            
+            self.L = self.L * 2
+            self.Kout = self.runStratGreedy(self.L)
+            #print 'Starting L: L: ',self.L,', K: ',self.Kout
 
-		return y,m,a,numK
+        #binary search
+        Lstep = int(self.L/2)
+        self.L = self.L - Lstep
+        while Lstep>0:
+            self.Kout = self.runStratGreedy(self.L)
+            #print 'Binary Search: L: ',self.L,', K: ',self.Kout
+            if self.Kout == self.K:
+                break
+            else:
+                Lstep = int(Lstep/2)
+                if self.Kout> self.K:                    
+                    self.L = self.L - Lstep
+                else:
+                    self.L = self.L + Lstep
 
-	def plotStrat(self,y,m,a):
-		approxPoints = np.arange(0,self.width+(1.0*self.width)/(self.M-1),1.0*self.width/(self.M-1))
-		plt.plot(approxPoints,self.f,'r')
-		plt.plot(approxPoints,self.f_strat_latest,'b')
+        return self.getErfInput(),self.getObj(), self.Kout
 
-		print self.f, approxPoints
-		plt.show()
+
+
+
+    def runStratGreedy(self,L=None):
+        """ 
+        Runs stratification and greedy aperture generation.
+
+        :param levels: stratification levels.
+        :param ind: level indices of each classified point along fluence curve.
+        :param self.f_strat: stratified fluence.
+
+        """
+        if not bool(L):
+            L = self.Linit
+        # stratify levels
+        levels,ind = spc.vq.kmeans2(self.f, L)
+        f_strat = levels[ind]
+        self.f_strat_latest = np.copy(f_strat)
+        y,m,a = [],[],[]
+        l,r = [],[]
+        gradMask = np.zeros(f_strat.shape)
+        # run iterative approach
+        while f_strat.max()>self.eps:
+            # find widest opening using CG pricing problem
+            # find "gradient" by finding non-neg indices
+            gradMask[:] = f_strat.shape[0]+1
+            gradMask[f_strat>self.eps] = -1
+
+            # run pricing problem
+            lBest,rBest = -1, -1
+            maxSoFar,maxEndingHere, lE, rE = 0,0,0,0
+            for i in range(f_strat.shape[0]):
+                maxEndingHere+=gradMask[i]
+                if maxEndingHere>=0:
+                    maxEndingHere,lE,rE = 0,i+1,i+1
+                if maxSoFar>maxEndingHere:
+                    maxSoFar,rE = maxEndingHere,i+1
+                    lBest,rBest = lE,rE
+            # add best block
+            if lBest ==-1 and rBest ==-1:
+                print 'error in the runStratGreedy algorithm'
+            else:
+                y.append(f_strat[lBest:rBest].min())
+                l.append(lBest)
+                r.append(rBest)
+                f_strat[lBest:rBest]-= f_strat[lBest:rBest].min()
+
+        #generate m,a
+        numK = len(y)
+        m = [0.5*(r[i] + l[i])*self.width/self.M for i in range(numK)]
+        a = [0.5*(r[i] - l[i])*self.width/self.M for i in range(numK)]
+        self.y, self.m, self.a = np.array(y).copy(), np.array(m).copy(), np.array(a).copy()
+
+        return numK
+
+    def getObj(self,gH=None):
+        """Calculates objective function"""
+        if gH is None:
+            g = np.zeros(self.M)
+            for k in range(len(self.y)):                            
+                g+= self.y[k] * 0.5 * (sps.erf((self.approxPoints - (self.m[k] - self.a[k]))/(self.sigma)) - sps.erf((self.approxPoints - (self.m[k] + self.a[k]))/(self.sigma)))
+        else:
+            g = gH.copy()
+        self.obj = np.sum(self.alphas * ((self.f - g) ** 2))
+        return self.obj
+
+    def getErfInput(self):
+        """
+        Outputs a vector for the explicit model
+
+        :return erfInputVector: concatinated [intensities,centers,half-widths], length 3*numApers
+        """
+        K = self.y.shape[0]
+        erfInputVector = np.zeros(3*K)
+        # populate intensities
+        erfInputVector[0:K] = np.copy(self.y)
+        # populate centers
+        erfInputVector[K:2*K] = np.copy(self.m)
+        # populate widths
+        erfInputVector[2*K:3*K] = np.copy(self.a)
+        return erfInputVector
+
+    def output(self,filename):
+        """Saves a MATLAB file with model outputs"""
+        io.savemat(self.directory + '/' + self.runTag + '_' + filename, {'y': self.y, 'm': self.m,'a': self.a, 'obj': self.obj, 'K': self.obj, 'width': self.width, 'numApprox': self.M, 'alphas': self.alphas, 'sigma':self.sigma, 'K':self.y.shape[0]})
+
+    def plotStrat(self):
+        """Plots the initial Fluence, stratified fluence, and aperture fluences"""
+        
+        plt.plot(self.approxPoints,self.f,'r')
+        plt.plot(self.approxPoints,self.f_strat_latest,'c')
+        
+        # calculate g total, plot g holder
+        gHolder = np.zeros(self.approxPoints.shape)
+        g = np.zeros(self.approxPoints.shape)        
+
+        for k in range(len(self.y)):
+            gHolder = self.y[k] * 0.5 * (sps.erf((self.approxPoints - (self.m[k] - self.a[k]))/(self.sigma)) - sps.erf((self.approxPoints - (self.m[k] + self.a[k]))/(self.sigma)))
+            plt.plot(self.approxPoints, gHolder,'b')
+            g+= gHolder
+        plt.plot(self.approxPoints,g,'g')
+        plt.title('Method: Clinical Greedy, obj: ' + str(round(self.getObj(g),5)) + ', K: ' + str(self.y.shape[0]) + ', L: ' + str(self.L))
+        plt.xlabel('Position along MLC opening')
+        plt.ylabel('Fluence')
+        plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
+
+        plt.show()

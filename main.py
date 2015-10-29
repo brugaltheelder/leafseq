@@ -61,32 +61,41 @@ a = np.array([width/3, width/6])
 
 #fErfVec = fGetter.erfSum(y,m,a,sigma, truncate=0.0)
 #fErfVec = fGetter.sinFunction(c,b)
-fErfVec = fGetter.unitStep(10, 4, 7, 2)
-#fErfVec = fGetter.doubleSinfunction(1., 1., 1. / 3., 4., 4)
+#fErfVec = fGetter.unitStep(10, 4, 7, 2)
+fErfVec = fGetter.doubleSinfunction(1., 1., 1. / 3., 4., 4)
 #fErfVec = fGetter.erfSumRand(numAper, 0.5, 0.5, sigma, width)
 
+Kgoal = 50
+obj, erfInputVec, mus, k = runclingreed(dat, fErfVec, int(Kgoal *1.5), Kgoal)
+#k = stratifiedGreedy.runStratGreedy(10)
 
-stratifiedGreedy = stratGreedy(fErfVec, 10, width)
-y,m,a,k = stratifiedGreedy.runStratGreedy(10)
-stratifiedGreedy.plotStrat(y, m, a)
+#print k, erfInputVec.shape, obj, mus
+
+obj,Mus = runerf(dat, ['clinGreed', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec, plotSeed=True, kOverride = k, pTag=str(Kgoal))
 
 
-exit()
-fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
+
+
+
+
+
+
+#fGetter.functionPlotter(fErfVec,1,1,1, color = 'r', blockVar=False)
+
 #erfInputVec = np.zeros(3*dat.numAper)
 # obj, erfInputVec = runcg(dat, RTplot=False, trueF=fErfVec)
 # print runcg(dat, RTplot=False, trueF=fErfVec)
-obj, erfInputVec, mus, poorobj = runcg(dat, RTplot=False, simpG=True, trueF=fErfVec)
-print obj, poorobj, mus
+#obj, erfInputVec, mus, poorobj = runcg(dat, RTplot=False, simpG=True, trueF=fErfVec)
+#print obj, poorobj, mus
 
 
-start = time.time()
-# print runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True, startVec=erfInputVec)
-obj,Mus = runerf(dat, ['random', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec, plotSeed=True)
-#obj,Mus = runerf(dat, ['peaks', 2], RTplot=False, finalShow=True, trueFlu=fErfVec, plotSeed = True)
-print obj, Mus
-print 'finished in {} seconds'.format(str(time.time()-start))
-#runerf(dat, ['unifcent', 2], RTplot=True, finalShow=True, trueFlu=fErfVec )
+# start = time.time()
+# # print runerf(dat, ['unifcent', 2], RTplot=False, finalShow=True, startVec=erfInputVec)
+# obj,Mus = runerf(dat, ['random', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec, plotSeed=True)
+# #obj,Mus = runerf(dat, ['peaks', 2], RTplot=False, finalShow=True, trueFlu=fErfVec, plotSeed = True)
+# print obj, Mus
+# print 'finished in {} seconds'.format(str(time.time()-start))
+# #runerf(dat, ['unifcent', 2], RTplot=True, finalShow=True, trueFlu=fErfVec )
 
 
 
