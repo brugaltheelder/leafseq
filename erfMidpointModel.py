@@ -14,15 +14,16 @@ from dataObj import *
 class erfMidModel:
     # class initialization
     def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, startingSolutionVector=None,
-                 trueFluenceVector=None, initializationStringAndParams=None, displayFreq = False, plotTag = '', plotSeed = False, kOverride = None):
+                 trueFluenceVector=None, initializationStringAndParams=None, displayFreq = False, plotTag = '', plotSeed = False):
 
         # Read in parameters
         assert (isinstance(runData, dataObj))
         self.realTimePlotting, self.realTimePlotSaving = realTimePlotting, realTimePlotSaving
-        if bool(kOverride):
-            self.K = kOverride
-        else:
+        if runData.kReal is None:
             self.K = runData.numAper
+        else:
+            self.K = runData.kReal
+
         self.width, self.resolution = 1.0 * runData.width, 1.0 * runData.resolution  # num apers, width of row, spacing of approx
         self.sinGap, self.sigma, self.sinScalar = 1.0 * runData.objParams[0], 1.0 * runData.sigma, 1.0 * \
                                                   runData.objParams[

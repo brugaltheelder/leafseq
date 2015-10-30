@@ -15,3 +15,7 @@ class dataObj():
         self.minAperWidth, self.maxAperWidth, self.aperCenterOffset = aperParams
         self.runTag = runTag
         self.directory = directory
+        self.kReal = None
+
+    def setKreal(self,k):
+        self.kReal = k

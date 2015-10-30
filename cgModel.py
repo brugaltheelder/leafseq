@@ -15,7 +15,11 @@ class cgSolver:
                  displayFreq=False, plotTag='', simpleG=False):
         # def __init__(self, numApproxPoints, alphas, f, sigma, approxPoints):
         self.realTimePlotting, self.realTimePlotSaving = realTimePlotting, realTimePlotSaving
-        self.K, self.width, self.resolution = runData.numAper, 1.0 * runData.width, 1.0 * runData.resolution  # num apers, width of row, spacing of approx
+        if runData.kReal is None:
+            self.K = runData.numAper
+        else:
+            self.K = runData.kReal
+        self.width, self.resolution = 1.0 * runData.width, 1.0 * runData.resolution  # num apers, width of row, spacing of approx
         self.sinGap, self.sigma, self.sinScalar = 1.0 * runData.objParams[0], 1.0 * runData.sigma, 1.0 * \
                                                   runData.objParams[
                                                       1]  # shift for sin obj, scacling factor for erf, sin scaling factor

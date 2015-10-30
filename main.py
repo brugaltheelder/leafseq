@@ -67,11 +67,12 @@ fErfVec = fGetter.doubleSinfunction(1., 1., 1. / 3., 4., 4)
 
 Kgoal = 50
 obj, erfInputVec, mus, k = runclingreed(dat, fErfVec, int(Kgoal *1.5), Kgoal)
+dat.setKreal(k)
 #k = stratifiedGreedy.runStratGreedy(10)
 
 #print k, erfInputVec.shape, obj, mus
 
-obj,Mus = runerf(dat, ['clinGreed', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec, plotSeed=True, kOverride = k, pTag=str(Kgoal))
+obj,Mus = runerf(dat, ['clinGreed', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec, plotSeed=True, pTag=str(Kgoal))
 
 
 

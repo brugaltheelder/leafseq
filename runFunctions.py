@@ -18,12 +18,12 @@ def runclingreed(data,trueFlu, Lestimate, desiredK, outputName = 'out.mat', pTag
     return obj, erfReturn, np.sum(mod.y), kout
 
 
-def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None, outputName='out.mat', closePlots = False, dispFreq = False, pTag = '', plotSeed = False, kOverride = None):
+def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None, outputName='out.mat', closePlots = False, dispFreq = False, pTag = '', plotSeed = False):
     """Runs Explicit model, plots solution, outputs matlab file, closes plots, returns objective and MUs"""
 
     mod = erfMidModel(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving,
                       initializationStringAndParams=initParams, startingSolutionVector=startVec,
-                      trueFluenceVector=trueFlu, displayFreq=dispFreq, plotTag=pTag, plotSeed = plotSeed, kOverride = kOverride)
+                      trueFluenceVector=trueFlu, displayFreq=dispFreq, plotTag=pTag, plotSeed = plotSeed)
 
     
 
@@ -65,6 +65,7 @@ class paramTesting:
         self.paramList = []
         self.runTimes = []
         self.totalMUs = []
+        self.realKs = []
 
     def addParam(self, pName, pValues):
         """Adds a param and its values"""
@@ -75,6 +76,9 @@ class paramTesting:
     def genCombination(self):
         """gets combination"""
         self.combination = product(*self.paramRanges)
+
+    def addRealK(self,k):
+        self.realKs.append(k)
 
     def addObjList(self,obj):
         """appends obj value to output list"""
@@ -106,4 +110,4 @@ class paramTesting:
         import scipy.io as io
         io.savemat(filename, {'paramNames':self.paramName, 'paramRanges':self.paramRanges, 'paramValues':self.paramValues,
                               'objectives': self.obj, 'runTimes': self.runTimes, 'paramList': self.paramList,
-                              'totalMU': self.totalMUs})
+                              'totalMU': self.totalMUs, 'realKs':self.realKs})
