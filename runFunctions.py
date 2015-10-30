@@ -9,7 +9,10 @@ from itertools import product
 
 
 def runclingreed(data,trueFlu, Lestimate, desiredK, outputName = 'out.mat', pTag = ''):
-    '''runs the clinical greedy model, returns objective, seed vector, MUs, number of apertures'''
+    '''Runs the clinical greedy model, returns objective, seed vector, MUs, number of apertures
+
+    :return a,b,c,d: Objective function, seed vector, total MUs, number of apertures used
+    '''
 
     mod = stratGreedy(trueFlu, Lestimate, data, K=desiredK, plotTag=pTag)
     erfReturn, obj, kout = mod.runClinicalReturnErfSeed()
@@ -19,7 +22,10 @@ def runclingreed(data,trueFlu, Lestimate, desiredK, outputName = 'out.mat', pTag
 
 
 def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, finalShow=False, trueFlu=None, outputName='out.mat', closePlots = False, dispFreq = False, pTag = '', plotSeed = False):
-    """Runs Explicit model, plots solution, outputs matlab file, closes plots, returns objective and MUs"""
+    """Runs Explicit model, plots solution, outputs matlab file, closes plots, returns objective and MUs
+    
+    :return a,b,c,d: Objective function, total MUs
+    """
 
     mod = erfMidModel(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving,
                       initializationStringAndParams=initParams, startingSolutionVector=startVec,
@@ -38,11 +44,14 @@ def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, fi
 
 def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False, outputName='out.mat', closePlots=False,
           dispFreq=False, pTag='', simpG=False):
-    """Runs CG model, plots solution, outputs matlab file, closes plots, returns objective and MUs and original obj"""
+    """Runs CG model, plots solution, outputs matlab file, closes plots, returns objective and MUs and original obj
+
+    :return a,b,c,d: Objective function, seed vector, total MUs, objective from unit calc
+    """
 
     mod = cgSolver(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving, trueFluenceVector=trueF,
                    displayFreq=dispFreq, plotTag=pTag, simpleG=simpG)
-    mod.solve(data.numAper)
+    mod.solve(mod.K)
     mod.printSolution(finalShow=finalShow)
     mod.output(outputName)    
     if closePlots:
@@ -78,18 +87,19 @@ class paramTesting:
         self.combination = product(*self.paramRanges)
 
     def addRealK(self,k):
+        """appends obj value to output list"""
         self.realKs.append(k)
 
     def addObjList(self,obj):
-        """appends obj value to output list"""
+        """appends obj value list to output list"""
         self.obj.append(obj)
 
     def addRuntimeList(self, rTimes):
-        """appends runtime value to output list"""
+        """appends runtime value list to output list"""
         self.runTimes.append(rTimes)
 
     def addMUList(self, MUs):
-        """appends MU value to output list"""
+        """appends MU value list to output list"""
         self.totalMUs.append(MUs)
 
     def getAndSaveParams(self, *indices):

@@ -1,5 +1,3 @@
-__author__ = 's162195'
-
 import scipy.optimize as spo
 import scipy.special as sps
 from scipy import io
@@ -10,10 +8,18 @@ from dataObj import *
 
 
 class cgSolver:
-    # reads in runData along with other run tags, pre-allocates values
-    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None,
-                 displayFreq=False, plotTag='', simpleG=False):
-        # def __init__(self, numApproxPoints, alphas, f, sigma, approxPoints):
+    """
+    Class for running the direct leaf optimization column generation solution methodology
+
+    Initialization: reads in runData along with other run tags, pre-allocates values        
+        
+    :param self.y: output fluences
+    :param self.lVec,self.rVec: left and right leaf positions  
+    """
+
+    def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, trueFluenceVector=None, displayFreq=False, plotTag='', simpleG=False):
+
+    
         self.realTimePlotting, self.realTimePlotSaving = realTimePlotting, realTimePlotSaving
         if runData.kReal is None:
             self.K = runData.numAper
@@ -64,30 +70,46 @@ class cgSolver:
             plt.ion()
             plt.show()
 
-    # returs obj, gradient
+    
     def calcObjGrad(self, y):
+        """Returs obj, gradient
+
+        :return a,b: returns objective function, gradient vector
+        """
         self.g = self.D.dot(y)
         diff = self.f - self.g
         return self.evalObj(y, diff=diff), self.D.transpose().dot(self.evalGrad(y, diff=diff))
 
-    # evaluates gradient in y-space
+    
     def evalGrad(self, y, diff=None):
+        """Evaluates gradient in y-space
+
+        :return grad: returns gradient
+        """
         # if diff==None, then calc diff, otherwise return gradient
         if diff is None:
             self.g = self.D.dot(y)
             diff = self.f - self.g
         return -2. * self.alphas * diff
 
-    #evaluates objective
+    
     def evalObj(self, y, diff=None):
+        """Evaluates objective
+
+        :return obj: returns objective function value
+        """
         # if diff==None, then calc diff, otherwise return objective
         if diff is None:
             self.g = self.D.dot(y)
             diff = self.f - self.g
         return np.sum(self.alphas * (diff ** 2))
 
-    #evaluates objective with erf leaves rather than unit step leaves
+    
     def finalObjEval(self):
+        """Evaluates objective with erf leaves rather than unit step leaves
+
+        :return obj: returns objective function value
+        """
         # generate new D
         Ds = np.zeros((self.nApprox, len(self.y)))
         for y in range(len(self.y)):
@@ -97,8 +119,12 @@ class cgSolver:
         diff = self.f - g
         return np.sum(self.alphas * (diff ** 2))
 
-    #solve the leaf pricing problem given some fluence y
+    
     def solvePP(self, y):
+        """Solve the leaf pricing problem given some fluence y
+
+        :return aper: returns self.addAper returns
+        """
         # calc gradient
         grad = self.evalGrad(y)
         lBest, rBest = -1, -1
@@ -118,17 +144,21 @@ class cgSolver:
         else:
             return self.addAper(lBest, rBest)  # rE is non-inclusive
 
-    #Run full solution methodology for CG - iterate between PP and RMP
+    
     def solve(self, aperMax):
+        """Run full solution methodology for CG - iterate between PP and RMP"""
         self.aperMax = aperMax
         while self.nY < self.aperMax:
             self.solvePP(self.y)
             self.solveRMP()
             #print 'Aperures {} of {} added, lPos: {}, rPos: {}, Obj: {}'.format(str(np.size(self.y)), str(self.aperMax), lPos, rPos,str(self.obj))
 
-    # generates next line of D-matrix given left and right leaf positions
+    
     def addAper(self, l, r):
-        # calculate col of D, add to sparse matrix using error function...make midpoint then write out function...truncate at very small
+        """Generates next line of D-matrix given left and right leaf positions
+
+        :return a,b: returns aperture endpoints
+        """        # calculate col of D, add to sparse matrix using error function...make midpoint then write out function...truncate at very small
         # calc Dcol along entire axis, then truncate
         Dcol = np.zeros(self.nApprox)
         if self.simpleG:
@@ -152,8 +182,9 @@ class cgSolver:
         self.nY +=1
         return self.approxPoints[l], self.approxPoints[r - 1]
 
-    #solves restricted master problem
+    
     def solveRMP(self):
+        """Solves restricted master problem"""
         # todo build in upper bounds on fluence
         self.res = spo.minimize(self.calcObjGrad, x0=self.y.copy(), method='L-BFGS-B', jac=True,
                                 bounds=np.array([(0, None) for i in range(np.size(self.y))]),
@@ -161,8 +192,12 @@ class cgSolver:
         self.y = self.res['x']
         self.obj = self.res['fun']
 
-    # builds input vector for explicit model
+    
     def getErfInput(self):
+        """Builds input vector for explicit model
+
+        :return erfInputVector: returns seed vector for Explicit model
+        """
         # initialize return vector
         K = np.size(self.y)
         erfInputVector = np.zeros(3*K)
@@ -175,8 +210,9 @@ class cgSolver:
 
         return erfInputVector
 
-    #saves to a matlab file
+    
     def output(self, filename):
+        """Saves to a matlab file"""
         io.savemat(self.directory + '/'+self.runTag + '_' + filename, {'y': self.y, 'l': self.lVec,
                               'r': self.rVec, 'obj': self.obj,
                               'sinGap': self.sinGap, 'K': self.K, 'width': self.width,
@@ -184,6 +220,8 @@ class cgSolver:
                               'alphas': self.alphas})
 
     def printSolution(self, ongoingfig=False, intermediateY=None, finalShow = False):
+        """Plots target and generated fluence as well as aperture fluences"""
+
         # plot main function
 
         if ongoingfig:
@@ -232,4 +270,5 @@ class cgSolver:
                 plt.show(block = False)
 
     def closePlots(self):
+        """Closes all open plots from matplotlib"""
         plt.close('all')

@@ -22,7 +22,7 @@ import pandas
 
 # #data testing for CG + Explicit models
 
-
+plotSeedSwitch = True
 
 printEveryThisManyIterations = 5
 
@@ -42,17 +42,17 @@ minAperEdgeGap = 0.
 
 
 # Generate data vectors - sin
-outfilename = 'sinout.mat'
-directory = 'singlesinClinK'
-kParam = np.arange(10, 40 + 1, 10)
-cParam = np.arange(2,5+1, 3)
-bParam = np.arange(1./width, 13./width+1./width, 3./width)
-print kParam, cParam, bParam
-params = paramTesting()
-params.addParam('maxAper',kParam.tolist())
-params.addParam('sinOffset',cParam.tolist())
-params.addParam('sinScalar',bParam.tolist())
-params.genCombination()
+# outfilename = 'sinout.mat'
+# directory = 'singlesinClinK'
+# kParam = np.arange(10, 40 + 1, 10)
+# cParam = np.arange(2,5+1, 3)
+# bParam = np.arange(1./width, 13./width+1./width, 3./width)
+# print kParam, cParam, bParam
+# params = paramTesting()
+# params.addParam('maxAper',kParam.tolist())
+# params.addParam('sinOffset',cParam.tolist())
+# params.addParam('sinScalar',bParam.tolist())
+# params.genCombination()
 
 
 # Generate data vectors - double sin
@@ -84,17 +84,17 @@ params.genCombination()
 
 
 # Generate data vectors - random step
-# # outfilename, order, directory = 'stepFunctionOutOrder0.mat', 0, 'stepOrder0ClinK' 
+outfilename, order, directory = 'stepFunctionOutOrder0.mat', 0, 'stepOrder0ClinK' 
 # outfilename, order, directory = 'stepFunctionOutOrder2.mat', 2, 'stepOrder2ClinK'
-# kParam = np.arange(10, 40 + 1, 10)
-# cParam = np.arange(5, 15 + 1, 5)
-# bParam = np.arange(3., 6 + 1, 1)
-# params = paramTesting()
-# params.addParam('maxAper', kParam.tolist())
-# params.addParam('numBins', cParam.tolist())
-# params.addParam('minRange', bParam.tolist())
-# params.genCombination()
-# print kParam, cParam, bParam
+kParam = np.arange(10, 40 + 1, 10)
+cParam = np.arange(10, 20 + 1, 5)
+bParam = np.arange(3., 6 + 1, 1)
+params = paramTesting()
+params.addParam('maxAper', kParam.tolist())
+params.addParam('numBins', cParam.tolist())
+params.addParam('minRange', bParam.tolist())
+params.genCombination()
+print kParam, cParam, bParam
 
 
 
@@ -103,30 +103,34 @@ fGetter = functionGetter(width, res)
 
 for kInd, cInd, bInd in params.combination:
 
+
+
+
+    # single sine
+    # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
+    # runName = params.getFilename(kInd, cInd, bInd)
+    # dat = dataObj([cP, bP], res, kP, sigma, width, alphas,[minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
+    # fVec = fGetter.sinFunction(cP,bP)
+
     # doublesine
     # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
     # runName = params.getFilename(kInd, cInd, bInd)
     # dat = dataObj([0, 0], res, kP, sigma, width, alphas,[minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
     # fVec = fGetter.doubleSinfunction(1.,1.,bP, cP,4.)
 
-
-    # single sine
-    kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
-    runName = params.getFilename(kInd, cInd, bInd)
-    dat = dataObj([cP, bP], res, kP, sigma, width, alphas,[minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
-    fVec = fGetter.sinFunction(cP,bP)
-
-    # random step
-    # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
-    # runName = params.getFilename(kInd, cInd, bInd)
-    # dat = dataObj([0, 0], res, kP, sigma, width, alphas, [minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
-    # fVec = fGetter.unitStep(cP, bP, 7., order=order)
-
     #erf functions
     # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
     # runName = params.getFilename(kInd, cInd, bInd)
     # dat = dataObj([0, 0], res, kP, sigma, width, alphas, [minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
-    # fVec = fGetter.erfSumRand(kP, cP, bP, sigma, width)    
+    # fVec = fGetter.erfSumRand(kP, cP, bP, sigma, width)   
+
+    # random step
+    kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
+    runName = params.getFilename(kInd, cInd, bInd)
+    dat = dataObj([0, 0], res, kP, sigma, width, alphas, [minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
+    fVec = fGetter.unitStep(cP, bP, 7., order=order)
+
+ 
 
 
 
@@ -141,7 +145,7 @@ for kInd, cInd, bInd in params.combination:
     # get the k goal, then set kReal 
 
     start = time.time()
-    obj,erfInputVec, MUs,kReal = runclingreed(dat, fVec, int(dat.numAper * 1.5), dat.numAper)
+    obj,erfInputVec, MUs,kReal = runclingreed(dat, fVec, int(dat.numAper * 1.5), dat.numAper, outputName='clinical_out.mat', pTag = 'clinical')
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time()-start)
@@ -150,21 +154,32 @@ for kInd, cInd, bInd in params.combination:
     params.addRealK(kReal)
 
 
+    # run explicit based on cg
+    start = time.time()
+    obj, MUs = runerf(dat, ['clinSeeded', 3], RTplot=False, finalShow=False, outputName='clinSeeded_out.mat',
+                      closePlots=True, startVec=erfInputVec, pTag='clinSeeded', trueFlu=fVec, plotSeed=plotSeedSwitch)
+    iterObj.append(obj)
+    iterMUs.append(MUs)
+    iterRunTime.append(time.time() - start)
+
+
 
 
     # run naive techniques
     # random
     start = time.time()
     obj, MUs = runerf(dat, ['random', 3], RTplot=False, finalShow=False, outputName='random_out.mat',
-                      closePlots=True, pTag='random', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, pTag='random', trueFlu=fVec, plotSeed=plotSeedSwitch)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
 
+
+
     # sliding window
     start = time.time()
     obj, MUs = runerf(dat, ['slidingwindow', 3], RTplot=False, finalShow=False, outputName='slidingwindow_out.mat',
-                      closePlots=True, pTag='slidingwindow', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, pTag='slidingwindow', trueFlu=fVec, plotSeed=plotSeedSwitch)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
@@ -172,7 +187,7 @@ for kInd, cInd, bInd in params.combination:
     # centered
     start = time.time()
     obj, MUs = runerf(dat, ['centered', 3], RTplot=False, finalShow=False, outputName='centered_out.mat',
-                      closePlots=True, pTag='centered', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, pTag='centered', trueFlu=fVec, plotSeed=plotSeedSwitch)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
@@ -180,7 +195,7 @@ for kInd, cInd, bInd in params.combination:
     # peaks
     start = time.time()
     obj, MUs = runerf(dat, ['peaks', 3], RTplot=False, finalShow=False, outputName='peaks_out.mat',
-                      closePlots=True, pTag='peaks', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, pTag='peaks', trueFlu=fVec, plotSeed=plotSeedSwitch)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
@@ -197,7 +212,7 @@ for kInd, cInd, bInd in params.combination:
     # run explicit based on cg
     start = time.time()
     obj, MUs = runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cg_out.mat',
-                      closePlots=True, startVec=erfInputVec, pTag='cg', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, startVec=erfInputVec, pTag='cg', trueFlu=fVec, plotSeed=plotSeedSwitch)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
@@ -214,7 +229,7 @@ for kInd, cInd, bInd in params.combination:
     # run explicit based on cg
     start = time.time()
     obj, MUs = runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cgsimp_out.mat',
-                      closePlots=True, startVec=erfInputVec, pTag='cgsimp', trueFlu=fVec, plotSeed=True)
+                      closePlots=True, startVec=erfInputVec, pTag='cgsimp', trueFlu=fVec, plotSeed=plotSeedSwitch)
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time() - start)
@@ -226,7 +241,7 @@ for kInd, cInd, bInd in params.combination:
     if len(params.obj) % printEveryThisManyIterations == 0:
         print 'Objective Function Values'
         print pandas.DataFrame(params.obj, [i for i in range(len(params.obj))],
-                               ['random','slidingwindow', 'centered', 'peaks', 'cg', 'cgSeeded', 'cgSimp', 'cgSimpSeeded'])
+                               ['clinical', 'clinSeeded','random','slidingwindow', 'centered', 'peaks', 'cg', 'cgSeeded', 'cgSimp', 'cgSimpSeeded'])
         #print 'Run Times'
         #print pandas.DataFrame(params.runTimes, [i for i in range(len(params.obj))],['random','slidingwindow', 'centered', 'peaks', 'cg', 'cgSeeded', 'cgSimp', 'cgSimpSeeded'])
 

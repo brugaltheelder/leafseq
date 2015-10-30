@@ -12,10 +12,11 @@ from dataObj import *
 
 
 class erfMidModel:
-    # class initialization
+    """
+    Takes an arbitrary fluence and some starting vector, descends to a local minimum 
+    """
     def __init__(self, runData, realTimePlotting=False, realTimePlotSaving=False, startingSolutionVector=None,
                  trueFluenceVector=None, initializationStringAndParams=None, displayFreq = False, plotTag = '', plotSeed = False):
-
         # Read in parameters
         assert (isinstance(runData, dataObj))
         self.realTimePlotting, self.realTimePlotSaving = realTimePlotting, realTimePlotSaving
@@ -71,13 +72,7 @@ class erfMidModel:
             self.varArray = np.copy(startingSolutionVector)
             self.seedY = np.copy(startingSolutionVector[0:self.K])
             self.seedM = np.copy(startingSolutionVector[self.K:2*self.K])
-            self.seedA = np.copy(startingSolutionVector[2*self.K:3*self.K])
-        elif initializationStringAndParams[0] == 'unifcent':
-            self.initializeVarsUniformCenter()
-        elif initializationStringAndParams[0] == 'unifwidth':
-            self.initializeVarsUniformWidth()
-        elif initializationStringAndParams[0] == 'unifmixed':
-            self.initializeVarsUniformMixed(initializationStringAndParams[1])
+            self.seedA = np.copy(startingSolutionVector[2*self.K:3*self.K])    
         elif initializationStringAndParams[0] == 'random':
             m,a = self.initializeVarsRandom()            
             y = self.getY(m,a)
@@ -107,6 +102,7 @@ class erfMidModel:
             plt.show()
 
     def setVarArray(self,y,m,a):
+        """Reads in seed, saves seed"""
         self.varArray[0:self.K] = y.copy()        
         self.varArray[self.K:2 * self.K] = m.copy()        
         self.varArray[2 * self.K:3 * self.K] = a.copy()
@@ -114,6 +110,11 @@ class erfMidModel:
 
 
     def getY(self,m,a):
+        """Solves RMP for DLO
+
+        :return seedRes['x']: returns the solution vector 
+        """
+
         y = np.zeros(self.K)       
         # get l,r
         l = np.maximum(0,np.round(1.0*self.numApproxPoints/self.width*(m-a),0))
@@ -130,30 +131,50 @@ class erfMidModel:
         return seedRes['x']
 
 
-    #calculates seed obj and grad
+    
     def seedCalcObjGrad(self,y):
+        """calculates seed obj and grad
+
+        :return a,b: returns objective value, gradient vector of seed for getting seed intensities
+        """
         diff = self.fTarget - self.seedD.dot(y)
         return np.sum(self.alphas * (diff ** 2)), self.seedD.transpose().dot(-2. * self.alphas * diff)
 
 
 
     def initializeVarsRandom(self):
+        """Generates random centers and widths, see writeup for details
+
+        :return m,a: returns centers vector, widths vector
+        """
         m = np.random.rand(self.K) * self.width
         a = np.random.rand(self.K) * self.width / 2.0
         return m,a        
 
     def initializeVarsSW(self):
+        """Generates beamlet-style centers and widths, see writeup for details
+
+        :return m,a: returns centers vector, widths vector
+        """
         m = np.array([1.0*(k*self.width)/(self.K+1) for k in range(1,self.K+1)])
         a = np.array([1.0*self.width/self.K for k in range(self.K)])
         return m,a
 
     def initializeVarsCentered(self):
+        """Generates relatively centered centers and widths, see writeup for details
+
+        :return m,a: returns centers vector, widths vector
+        """
         m = np.array([1.0*self.width/2 for k in range(self.K)])
         m = self.width * (np.random.rand(self.K)-0.5)/2.0 + self.width/2.0
         a = np.array([1.0*(1.0* k*self.width)/(2.0*(self.K+1)) for k in range(1,self.K+1)])
         return m,a
 
     def initializeVarsPeaks(self):
+        """Generates centers and widths for each peak, then random others, see writeup for details
+
+        :return m,a: returns centers vector, widths vector
+        """
         m,a = [self.width/2],[self.width/2]
         peaks = spsignal.find_peaks_cwt(self.fTarget, np.arange(10,20))    
         nPeaks= len(peaks)
@@ -172,55 +193,20 @@ class erfMidModel:
 
 
 
-    # calculates derivative of erf
+    
     def derf(self, x):
+        """calculates derivative of erf
+
+        :returns derf: derivative of error function at x
+        """
         return 2 / np.pi * np.exp(-1 * x * x)
-
-    # generates initial apertures with uniformly spaced centers and similar widths
-    def initializeVarsUniformCenter(self):
-        # initialize intensities
-        self.varArray[0:self.K] = np.ones(self.K) * self.sinGap / self.K
-        # initialize centers
-        self.varArray[self.K:2 * self.K] = np.arange(0 + 1. / 2. / (self.K + 1), self.width, 1. * self.width / (self.K))
-        # initialize widths
-        self.varArray[2 * self.K:3 * self.K] = self.width / 2 * np.ones(self.K) * np.random.rand(self.K)
-
-    # generates initial apertures with similar centers and uniformly varied widths
-    def initializeVarsUniformWidth(self):
-        # initialize intensities
-        self.varArray[0:self.K] = np.ones(self.K) * self.sinGap / self.K
-        # initialize centers
-        self.varArray[self.K:2 * self.K] = self.width / 2. + 2 * (np.random.rand(self.K) - 0.5) / max(10., self.width)
-        # initialize widths
-        self.varArray[2 * self.K:3 * self.K] = np.arange(0 + 1. / 2. / (self.K + 1), self.width,
-                                                         1. * self.width / (self.K))
-
-    # this is a mix of initializeVarsUniformCenter and initializeVarsUniformWidth
-    def initializeVarsUniformMixed(self, ratio):
-        # initialize intensities
-        self.varArray[0:self.K] = np.ones(self.K) * self.sinGap / self.K
-        # initialize centers
-        self.varArray[self.K:self.K + self.K / ratio] = self.width / 2. + 2 * (
-            np.random.rand(self.K / ratio) - 0.5) / max(10., self.width)
-        self.varArray[self.K + self.K / ratio:2 * self.K] = np.arange(0 + 1. / 2. / ((self.K - self.K / ratio) + 1),
-                                                                      self.width,
-                                                                      1. * self.width / (self.K - self.K / ratio))
-        # initialize widths
-        self.varArray[2 * self.K:2 * self.K + self.K / ratio] = np.arange(0 + 1. / 2. / (self.K / ratio + 1),
-                                                                          self.width,
-                                                                          1. * self.width / (self.K / ratio))
-        self.varArray[2 * self.K + self.K / ratio:3 * self.K] = self.width / 2 * np.ones(
-            self.K - self.K / ratio) * np.random.rand(self.K - self.K / ratio)
-
-    # this one has very little thought put into it and should be ignored
-    def initializeVarsRandomShitty(self):
-        self.varArray = np.ones(3 * self.K) * np.random.rand(self.K * 3)
-        self.varArray[0:self.K] *= self.sinGap
-        self.varArray[self.K:3 * self.K] *= self.width
-        print self.varArray
 
     # returns both the objective function and the derivative for the solver
     def objGradEval(self, x):
+        '''calculates helper arrays and then returns objective function and gradient for the explicit model
+
+        :return a,b: returns objective function, gradient vector
+        '''
 
         grad = np.zeros(3*self.K)
         # set g and gUnweighted to zero
@@ -255,18 +241,20 @@ class erfMidModel:
         self.objCalls += 1
         return np.sum(self.alphas * (self.diff ** 2)), self.grad
 
-    # invokes solver
+    
     def solve(self):
+        """Invokes solver for explicit model"""
         self.res = spo.minimize(self.objGradEval, x0=self.varArray.copy(), method='L-BFGS-B', jac=True,
                                 bounds=self.bounds,
                                 options={'ftol': 1e-4, 'disp': self.displayFreq})
         self.finalX = self.res['x']
         self.obj = self.res['fun']
 
-    # plotter (can handle a single ongoing plot (0) or the single final plot (1))
+    
     def plotSolution(self, ongoingfig=False, intermediateX=None, finalShow = False):
-        # plot main function
+        """Plotter (can handle a single ongoing plot (0) or the single final plot (1)). Plots target and generated fluence as well as aperture fluences"""
 
+        # plot main function
         if ongoingfig:
             plt.figure(0)
             plt.clf()
@@ -348,12 +336,14 @@ class erfMidModel:
                 plt.show(block = False)
 
     def closePlots(self):
+        """Closes all open plots from matplotlib"""
         plt.close('all')
 
 
 
-    # outputs values to a .mat file incase of MATLAB integration
+    
     def output(self, filename):
+        """outputs values to a .mat file incase of MATLAB integration"""
         io.savemat(self.directory + '/' + self.runTag + '_' + filename, {'y': self.finalX[0:self.K], 'm': self.finalX[self.K:2 * self.K],
                               'a': self.finalX[2 * self.K:3 * self.K], 'obj': self.obj,
                               'sinGap': self.sinGap, 'K': self.K, 'width': self.width,

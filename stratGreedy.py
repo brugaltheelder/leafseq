@@ -17,7 +17,6 @@ class stratGreedy(object):
     """Greedy clinically-based leaf sequencing solver"""
 
     def __init__(self, f,L, runData, K=None, plotTag = 'clinGreed'):
-        """ Initializes inputs"""
         self.f, self.L, self.K = f, L,None
         self.Linit = self.L
         self.width, self.sigma = 1.0* runData.width, 1.0* runData.sigma
@@ -37,6 +36,8 @@ class stratGreedy(object):
         This is the main run function that runs the full algorithm and returns the seed and objective. This calls **self.runStratGreedy**. 
 
         If a K is given, the algorithm will try to match that K. It builds up L then does a binary search along L to get close to K until K is reached or the binary search step is 1.
+
+        :return a,b,c: resulting vector seed, objective, resulting number of apertures
         '''
         self.Kout = 0
         if self.K is None:
@@ -45,17 +46,22 @@ class stratGreedy(object):
         
         #initialize starting L
         self.Kout = self.runStratGreedy(self.L)
+        
         while self.Kout<self.K:            
+            Kstart = self.Kout
             self.L = self.L * 2
             self.Kout = self.runStratGreedy(self.L)
-            #print 'Starting L: L: ',self.L,', K: ',self.Kout
+            print 'Starting L: L: ',self.L,', K: ',self.Kout, ' K target: ',self.K
+            if self.Kout == Kstart:
+                break
+
 
         #binary search
         Lstep = int(self.L/2)
         self.L = self.L - Lstep
         while Lstep>0:
             self.Kout = self.runStratGreedy(self.L)
-            #print 'Binary Search: L: ',self.L,', K: ',self.Kout
+            print 'Binary Search: L: ',self.L,', K: ',self.Kout
             if self.Kout == self.K:
                 break
             else:
@@ -77,6 +83,7 @@ class stratGreedy(object):
         :param levels: stratification levels.
         :param ind: level indices of each classified point along fluence curve.
         :param self.f_strat: stratified fluence.
+        :return numK: return the resulting number of apertures used
 
         """
         if not bool(L):
@@ -123,7 +130,10 @@ class stratGreedy(object):
         return numK
 
     def getObj(self,gH=None):
-        """Calculates objective function"""
+        """Calculates objective function
+
+        :return self.obj: Objective function when calculated using errof functions
+        """
         if gH is None:
             g = np.zeros(self.M)
             for k in range(len(self.y)):                            
