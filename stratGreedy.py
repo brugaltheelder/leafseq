@@ -184,3 +184,7 @@ class stratGreedy(object):
         plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
 
         plt.show()
+        
+    def closePlots(self):
+        """Closes all open plots from matplotlib"""
+        plt.close('all')

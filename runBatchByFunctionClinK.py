@@ -42,17 +42,17 @@ minAperEdgeGap = 0.
 
 
 # Generate data vectors - sin
-# outfilename = 'sinout.mat'
-# directory = 'singlesinClinK'
-# kParam = np.arange(10, 40 + 1, 10)
-# cParam = np.arange(2,5+1, 3)
-# bParam = np.arange(1./width, 13./width+1./width, 3./width)
-# print kParam, cParam, bParam
-# params = paramTesting()
-# params.addParam('maxAper',kParam.tolist())
-# params.addParam('sinOffset',cParam.tolist())
-# params.addParam('sinScalar',bParam.tolist())
-# params.genCombination()
+outfilename = 'sinout.mat'
+directory = 'singlesinClinK'
+kParam = np.arange(10, 40 + 1, 10)
+cParam = np.arange(2,5+1, 3)
+bParam = np.arange(1./width, 13./width+1./width, 3./width)
+print kParam, cParam, bParam
+params = paramTesting()
+params.addParam('maxAper',kParam.tolist())
+params.addParam('sinOffset',cParam.tolist())
+params.addParam('sinScalar',bParam.tolist())
+params.genCombination()
 
 
 # Generate data vectors - double sin
@@ -84,17 +84,17 @@ minAperEdgeGap = 0.
 
 
 # Generate data vectors - random step
-outfilename, order, directory = 'stepFunctionOutOrder0.mat', 0, 'stepOrder0ClinK' 
-# outfilename, order, directory = 'stepFunctionOutOrder2.mat', 2, 'stepOrder2ClinK'
-kParam = np.arange(10, 40 + 1, 10)
-cParam = np.arange(10, 20 + 1, 5)
-bParam = np.arange(3., 6 + 1, 1)
-params = paramTesting()
-params.addParam('maxAper', kParam.tolist())
-params.addParam('numBins', cParam.tolist())
-params.addParam('minRange', bParam.tolist())
-params.genCombination()
-print kParam, cParam, bParam
+# outfilename, order, directory = 'stepFunctionOutOrder0.mat', 0, 'stepOrder0ClinK' 
+# # outfilename, order, directory = 'stepFunctionOutOrder2.mat', 2, 'stepOrder2ClinK'
+# kParam = np.arange(10, 40 + 1, 10)
+# cParam = np.arange(10, 20 + 1, 5)
+# bParam = np.arange(3., 6 + 1, 1)
+# params = paramTesting()
+# params.addParam('maxAper', kParam.tolist())
+# params.addParam('numBins', cParam.tolist())
+# params.addParam('minRange', bParam.tolist())
+# params.genCombination()
+# print kParam, cParam, bParam
 
 
 
@@ -107,10 +107,10 @@ for kInd, cInd, bInd in params.combination:
 
 
     # single sine
-    # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
-    # runName = params.getFilename(kInd, cInd, bInd)
-    # dat = dataObj([cP, bP], res, kP, sigma, width, alphas,[minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
-    # fVec = fGetter.sinFunction(cP,bP)
+    kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
+    runName = params.getFilename(kInd, cInd, bInd)
+    dat = dataObj([cP, bP], res, kP, sigma, width, alphas,[minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
+    fVec = fGetter.sinFunction(cP,bP)
 
     # doublesine
     # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
@@ -125,10 +125,10 @@ for kInd, cInd, bInd in params.combination:
     # fVec = fGetter.erfSumRand(kP, cP, bP, sigma, width)   
 
     # random step
-    kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
-    runName = params.getFilename(kInd, cInd, bInd)
-    dat = dataObj([0, 0], res, kP, sigma, width, alphas, [minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
-    fVec = fGetter.unitStep(cP, bP, 7., order=order)
+    # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
+    # runName = params.getFilename(kInd, cInd, bInd)
+    # dat = dataObj([0, 0], res, kP, sigma, width, alphas, [minAperWidth, maxAperWidth, minAperEdgeGap], runName, directory)
+    # fVec = fGetter.unitStep(cP, bP, 7., order=order)
 
  
 
@@ -145,7 +145,7 @@ for kInd, cInd, bInd in params.combination:
     # get the k goal, then set kReal 
 
     start = time.time()
-    obj,erfInputVec, MUs,kReal = runclingreed(dat, fVec, int(dat.numAper * 1.5), dat.numAper, outputName='clinical_out.mat', pTag = 'clinical')
+    obj,erfInputVec, MUs,kReal = runclingreed(dat, fVec, int(dat.numAper * 1.5), dat.numAper, outputName='clinical_out.mat', closePlots=True, pTag = 'clinical')
     iterObj.append(obj)
     iterMUs.append(MUs)
     iterRunTime.append(time.time()-start)

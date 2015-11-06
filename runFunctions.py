@@ -8,7 +8,7 @@ import math
 from itertools import product
 
 
-def runclingreed(data,trueFlu, Lestimate, desiredK, outputName = 'out.mat', pTag = ''):
+def runclingreed(data,trueFlu, Lestimate, desiredK, outputName = 'out.mat', pTag = '', closePlots = False):
     '''Runs the clinical greedy model, returns objective, seed vector, MUs, number of apertures
 
     :return a,b,c,d: Objective function, seed vector, total MUs, number of apertures used
@@ -18,6 +18,8 @@ def runclingreed(data,trueFlu, Lestimate, desiredK, outputName = 'out.mat', pTag
     erfReturn, obj, kout = mod.runClinicalReturnErfSeed()
     mod.plotStrat()
     mod.output(outputName)
+    if closePlots:
+        mod.closePlots()
     return obj, erfReturn, np.sum(mod.y), kout
 
 
