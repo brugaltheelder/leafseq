@@ -169,6 +169,8 @@ class stratGreedy(object):
         plt.plot(self.approxPoints,self.f,'r')
         plt.plot(self.approxPoints,self.f_strat_latest,'c')
         
+        plt.ylim(0, 1.2 * max(np.max(self.y), np.max(self.f)))
+        plt.xlim(0, self.width)
         # calculate g total, plot g holder
         gHolder = np.zeros(self.approxPoints.shape)
         g = np.zeros(self.approxPoints.shape)        
