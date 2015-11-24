@@ -19,8 +19,6 @@ import numpy as np
 import time
 import pandas
 
-
-
 # #data testing for CG + Explicit models
 res = 0.01
 sigma = 0.075
