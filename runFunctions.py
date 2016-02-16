@@ -1,11 +1,10 @@
 __author__ = 's162195'
 
-from erfMidpointModel import *
-from cgModel import *
-from dataObj import *
-from stratGreedy import *
-import math
 from itertools import product
+
+from cgModel import *
+from erfMidpointModel import *
+from stratGreedy import *
 
 
 def runclingreed(data,trueFlu, Lestimate, desiredK, outputName = 'out.mat', pTag = '', closePlots = False):
@@ -31,7 +30,7 @@ def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, fi
 
     mod = erfMidModel(data, realTimePlotting=RTplot, realTimePlotSaving=RTplotsaving,
                       initializationStringAndParams=initParams, startingSolutionVector=startVec,
-                      trueFluenceVector=trueFlu, displayFreq=dispFreq, plotTag=pTag, plotSeed = plotSeed)
+                      trueFluenceVector=trueFlu, displayFreq=dispFreq, plotTag=pTag, plotSeed=plotSeed)
 
     
 

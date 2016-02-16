@@ -18,7 +18,7 @@ import numpy as np
 import time
 import pandas
 
-
+np.random.seed(seed=1)
 
 # #data testing for CG + Explicit models
 

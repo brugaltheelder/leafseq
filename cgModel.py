@@ -237,7 +237,7 @@ class cgSolver:
 
         # Objective function evaluation and plotting
 
-        plt.plot(self.approxPoints, self.f, 'r')
+        plt.plot(self.approxPoints, self.f, 'r', linestyle='dotted', zorder=2, linewidth=2)
 
         # plots total sequenced fluence
         g = self.D.dot(yVec)
@@ -260,7 +260,12 @@ class cgSolver:
                 plt.savefig(self.directory + '/' + 'CGiterPlotOut_' + str(self.figCounter) + '_.png')
                 self.figCounter += 1
         else:
-            plt.title('Method: CG, obj: ' + str(round(self.finalObjEval(), 5)) + ', nAper: ' + str(np.size(self.y)))
+            if self.simpleG:
+                plt.title(
+                    'Method: DLO-U Seed, obj: ' + str(round(self.finalObjEval(), 5)) + ', K: ' + str(np.size(self.y)))
+            else:
+                plt.title(
+                    'Method: DLO Seed, obj: ' + str(round(self.finalObjEval(), 5)) + ', K: ' + str(np.size(self.y)))
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
             plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')

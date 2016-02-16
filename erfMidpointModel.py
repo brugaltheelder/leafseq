@@ -1,10 +1,10 @@
 __author__ = 'Troy Long'
 
-import numpy as np
 import scipy.optimize as spo
-import scipy.special as sps
 import scipy.signal as spsignal
+import scipy.special as sps
 from scipy import io
+
 # import matplotlib
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -199,7 +199,8 @@ class erfMidModel:
 
         :returns derf: derivative of error function at x
         """
-        return 2 / np.pi * np.exp(-1 * x * x)
+        return 2 / np.sqrt(np.pi) * np.exp(-1 * x * x)
+        # return 2 / np.pi * np.exp(-1 * x * x)
 
     # returns both the objective function and the derivative for the solver
     def objGradEval(self, x):
@@ -267,7 +268,7 @@ class erfMidModel:
 
         # Objective function evaluation and plotting
 
-        plt.plot(self.approxPoints, self.fTarget, 'r')
+        plt.plot(self.approxPoints, self.fTarget, 'r', linestyle='dotted', zorder=2, linewidth=2)
 
         # Sets coherent limits to plot
         plt.ylim(0, 1.2 * max(np.max(self.finalX[0:self.K]), np.max(self.fTarget)))
@@ -310,7 +311,7 @@ class erfMidModel:
                 plt.savefig(self.directory + '/' + self.runTag + '_ERFiterPlotOut_' + str(self.figCounter) + '.png')
                 self.figCounter += 1
         else:
-            plt.title('Method: ERF, obj: ' + str(round(self.obj, 5)) + ', nAper: ' + str(self.K))
+            plt.title('Method: CLO, obj: ' + str(round(self.obj, 5)) + ', K: ' + str(self.K))
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
             plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
@@ -320,13 +321,14 @@ class erfMidModel:
 
                     idx = self.approxPoints <= self.seedM[k]
                     plt.plot(self.approxPoints[idx], self.seedY[k] * 1./2. * (1 + sps.erf(
-                        (self.approxPoints[idx] - (self.seedM[k] - self.seedA[k])) / self.sigma)), 'y')
+                        (self.approxPoints[idx] - (self.seedM[k] - self.seedA[k])) / self.sigma)), 'k',
+                             linestyle='dashed', zorder=3)
                     # plot right error function
                     idx = self.approxPoints > self.seedM[k]
                     plt.plot(self.approxPoints[idx], self.seedY[k] / 2. * (
                         sps.erfc(
                             (self.approxPoints[idx] - (self.seedM[k] + self.seedA[k])) / self.sigma)),
-                             'y')
+                             'k', linestyle='dashed', zorder=3)
 
                 plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '_withSeed.png')
 

@@ -3,11 +3,11 @@ Created on 29 October 2015
 @author: Troy Long
 """
 
+import warnings
 
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.cluster as spc
-import matplotlib.pyplot as plt
-import warnings
 import scipy.special as sps
 from scipy import io
 
@@ -165,9 +165,9 @@ class stratGreedy(object):
 
     def plotStrat(self):
         """Plots the initial Fluence, stratified fluence, and aperture fluences"""
-        
-        plt.plot(self.approxPoints,self.f,'r')
-        plt.plot(self.approxPoints,self.f_strat_latest,'c')
+
+        plt.plot(self.approxPoints, self.f, 'r', linestyle='dotted', zorder=2, linewidth=2)
+        # plt.plot(self.approxPoints,self.f_strat_latest,'c', linestyle = '')
         
         plt.ylim(0, 1.2 * max(np.max(self.y), np.max(self.f)))
         plt.xlim(0, self.width)
@@ -179,8 +179,10 @@ class stratGreedy(object):
             gHolder = self.y[k] * 0.5 * (sps.erf((self.approxPoints - (self.m[k] - self.a[k]))/(self.sigma)) - sps.erf((self.approxPoints - (self.m[k] + self.a[k]))/(self.sigma)))
             plt.plot(self.approxPoints, gHolder,'b')
             g+= gHolder
-        plt.plot(self.approxPoints,g,'g')
-        plt.title('Method: Clinical Greedy, obj: ' + str(round(self.getObj(g),5)) + ', K: ' + str(self.y.shape[0]) + ', L: ' + str(self.L))
+        plt.plot(self.approxPoints, g, 'g', linestyle='solid')
+        plt.title(
+            'Method: Trad Seed, obj: ' + str(round(self.getObj(g), 5)) + ', K: ' + str(self.y.shape[0]) + ', L: ' + str(
+                self.L))
         plt.xlabel('Position along MLC opening')
         plt.ylabel('Fluence')
         plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')

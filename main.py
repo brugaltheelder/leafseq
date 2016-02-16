@@ -11,14 +11,12 @@ except ImportError:
 
 # import matplotlib
 # matplotlib.use('Agg')
-import time
 
-import numpy as np
-
-from runFunctions import *
 from fluenceFunctionBuilders import *
+from runFunctions import *
 from stratGreedy import *
 
+np.random.seed(0)
 
 # #data testing for CG + Explicit models
 res = 0.01
@@ -65,14 +63,15 @@ a = np.array([width/3, width/6])
 fErfVec = fGetter.doubleSinfunction(1., 1., 1. / 3., 4., 4)
 #fErfVec = fGetter.erfSumRand(numAper, 0.5, 0.5, sigma, width)
 
-Kgoal = 50
+Kgoal = 200
 obj, erfInputVec, mus, k = runclingreed(dat, fErfVec, int(Kgoal *1.5), Kgoal)
 dat.setKreal(k)
 #k = stratifiedGreedy.runStratGreedy(10)
 
 #print k, erfInputVec.shape, obj, mus
 
-obj,Mus = runerf(dat, ['clinGreed', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec, plotSeed=True, pTag=str(Kgoal))
+obj, Mus = runerf(dat, ['clinGreed', 2], RTplot=False, finalShow=True, startVec=erfInputVec, trueFlu=fErfVec,
+                  plotSeed=True, pTag=str(Kgoal), dispFreq=True)
 
 
 
