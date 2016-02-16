@@ -32,15 +32,15 @@ def runerf(data, initParams, RTplot=False, RTplotsaving=False, startVec=None, fi
                       initializationStringAndParams=initParams, startingSolutionVector=startVec,
                       trueFluenceVector=trueFlu, displayFreq=dispFreq, plotTag=pTag, plotSeed=plotSeed)
 
-    
-
+    initialObj, grad = mod.objGradEval(mod.varArray)
+    seedMUs = np.sum(mod.varArray[0:mod.K])
     mod.solve()
     mod.plotSolution(finalShow=finalShow)
     mod.output(outputName)
     if closePlots:
         mod.closePlots()
-    
-    return mod.obj, np.sum(mod.finalX[0:mod.K])
+
+    return mod.obj, np.sum(mod.finalX[0:mod.K]), initialObj, seedMUs
 
 
 def runcg(data, RTplot=False, RTplotsaving=False, trueF=None, finalShow=False, outputName='out.mat', closePlots=False,
@@ -76,6 +76,7 @@ class paramTesting:
         self.runTimes = []
         self.totalMUs = []
         self.realKs = []
+        self.runTags = []
 
     def addParam(self, pName, pValues):
         """Adds a param and its values"""
@@ -99,6 +100,9 @@ class paramTesting:
         """appends runtime value list to output list"""
         self.runTimes.append(rTimes)
 
+    def addTagList(self, tags):
+        self.runTags.append(tags)
+
     def addMUList(self, MUs):
         """appends MU value list to output list"""
         self.totalMUs.append(MUs)
@@ -121,4 +125,4 @@ class paramTesting:
         import scipy.io as io
         io.savemat(filename, {'paramNames':self.paramName, 'paramRanges':self.paramRanges, 'paramValues':self.paramValues,
                               'objectives': self.obj, 'runTimes': self.runTimes, 'paramList': self.paramList,
-                              'totalMU': self.totalMUs, 'realKs':self.realKs})
+                              'totalMU': self.totalMUs, 'realKs': self.realKs, 'runTags': self.runTags})

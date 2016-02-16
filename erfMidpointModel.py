@@ -72,26 +72,28 @@ class erfMidModel:
             self.varArray = np.copy(startingSolutionVector)
             self.seedY = np.copy(startingSolutionVector[0:self.K])
             self.seedM = np.copy(startingSolutionVector[self.K:2*self.K])
-            self.seedA = np.copy(startingSolutionVector[2*self.K:3*self.K])    
-        elif initializationStringAndParams[0] == 'random':
+            self.seedA = np.copy(startingSolutionVector[2 * self.K:3 * self.K])
+        elif 'Rand' in initializationStringAndParams[0]:
             m,a = self.initializeVarsRandom()            
             y = self.getY(m,a)
             self.setVarArray(y,m,a)
-        elif initializationStringAndParams[0] == 'slidingwindow':
+        elif 'Unif' in initializationStringAndParams[0]:
             m,a = self.initializeVarsSW()            
             y = self.getY(m,a)
             self.setVarArray(y,m,a)
-        elif initializationStringAndParams[0] == 'centered':
+        elif 'Cent' in initializationStringAndParams[0]:
             m,a = self.initializeVarsCentered()            
             y = self.getY(m,a)
             y = np.ones(self.K) * y.sum()/self.K
             self.setVarArray(y,m,a)
-        elif initializationStringAndParams[0] == 'peaks':
+        elif 'Peak' in initializationStringAndParams[0]:
             m,a = self.initializeVarsPeaks()
             y = self.getY(m, a)
             self.setVarArray(y, m, a)
         else:
-            self.initializeVarsUniformMixed(2)
+            print 'error'
+            exit()
+            # self.initializeVarsUniformMixed(2)
 
 
         # start ongoing graph if necessary

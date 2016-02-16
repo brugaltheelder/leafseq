@@ -51,7 +51,7 @@ class stratGreedy(object):
             Kstart = self.Kout
             self.L = self.L * 2
             self.Kout = self.runStratGreedy(self.L)
-            print 'Starting L: L: ',self.L,', K: ',self.Kout, ' K target: ',self.K
+            # print 'Starting L: L: ',self.L,', K: ',self.Kout, ' K target: ',self.K
             if self.Kout == Kstart:
                 break
 
@@ -61,7 +61,7 @@ class stratGreedy(object):
         self.L = self.L - Lstep
         while Lstep>0:
             self.Kout = self.runStratGreedy(self.L)
-            print 'Binary Search: L: ',self.L,', K: ',self.Kout
+            # print 'Binary Search: L: ',self.L,', K: ',self.Kout
             if self.Kout == self.K:
                 break
             else:

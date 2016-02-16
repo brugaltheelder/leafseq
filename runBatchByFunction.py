@@ -136,77 +136,95 @@ for kInd, cInd, bInd in params.combination:
     iterObj = []
     iterRunTime = []
     iterMUs = []
+    iterTag = []
 
     # run naive techniques
     # random
     start = time.time()
-    obj, MUs = runerf(dat, ['random', 3], RTplot=False, finalShow=False, outputName='random_out.mat',
-                      closePlots=True, pTag='random', trueFlu=fVec, plotSeed=True)
+    tag = 'Rand'
+    obj, MUs = runerf(dat, [tag, 3], RTplot=False, finalShow=False, outputName=tag + '_out.mat',
+                      closePlots=True, pTag=tag, trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
+    iterTag.append(tag)
     iterRunTime.append(time.time() - start)
 
     # sliding window
     start = time.time()
-    obj, MUs = runerf(dat, ['slidingwindow', 3], RTplot=False, finalShow=False, outputName='slidingwindow_out.mat',
-                      closePlots=True, pTag='slidingwindow', trueFlu=fVec, plotSeed=True)
+    tag = 'Unif'
+    obj, MUs = runerf(dat, [tag, 3], RTplot=False, finalShow=False, outputName=tag + '_out.mat',
+                      closePlots=True, pTag=tag, trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
+    iterTag.append(tag)
     iterRunTime.append(time.time() - start)
 
     # centered
     start = time.time()
-    obj, MUs = runerf(dat, ['centered', 3], RTplot=False, finalShow=False, outputName='centered_out.mat',
-                      closePlots=True, pTag='centered', trueFlu=fVec, plotSeed=True)
+    tag = 'Cent'
+    obj, MUs = runerf(dat, [tag, 3], RTplot=False, finalShow=False, outputName=tag + '_out.mat',
+                      closePlots=True, pTag=tag, trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
+    iterTag.append(tag)
     iterRunTime.append(time.time() - start)
 
     # peaks
     start = time.time()
-    obj, MUs = runerf(dat, ['peaks', 3], RTplot=False, finalShow=False, outputName='peaks_out.mat',
-                      closePlots=True, pTag='peaks', trueFlu=fVec, plotSeed=True)
+    tag = 'Peak'
+    obj, MUs = runerf(dat, [tag, 3], RTplot=False, finalShow=False, outputName=tag + '_out.mat',
+                      closePlots=True, pTag=tag, trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
+    iterTag.append(tag)
     iterRunTime.append(time.time() - start)
 
     # run CG
     start = time.time()
-    obj, erfInputVec, MUs, otherObj = runcg(dat, RTplot=False, finalShow=False, outputName='cgseed_out.mat',
-                                            closePlots=True, pTag='cgseed', trueF=fVec)
+    tag = 'DLO'
+    obj, erfInputVec, MUs, otherObj = runcg(dat, RTplot=False, finalShow=False, outputName=tag + '_out.mat',
+                                            closePlots=True, pTag=tag, trueF=fVec)
     iterMUs.append(MUs)
     iterObj.append(obj)
+    iterTag.append(tag)
     iterRunTime.append(time.time() - start)
 
 
     # run explicit based on cg
     start = time.time()
-    obj, MUs = runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cg_out.mat',
-                      closePlots=True, startVec=erfInputVec, pTag='cg', trueFlu=fVec, plotSeed=True)
+    tag = 'CLO_DLO'
+    obj, MUs = runerf(dat, [tag, 3], RTplot=False, finalShow=False, outputName=tag + '_out.mat',
+                      closePlots=True, startVec=erfInputVec, pTag=tag, trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
+    iterTag.append(tag)
     iterRunTime.append(time.time() - start)
 
     # run CG with simple objective
     start = time.time()
-    obj, erfInputVec, MUs, otherObj = runcg(dat, RTplot=False, finalShow=False, outputName='cgsimpseed_out.mat',
-                                            closePlots=True, pTag='cgsimpseed', simpG=True, trueF=fVec)
+    tag = 'DLO-U'
+    obj, erfInputVec, MUs, otherObj = runcg(dat, RTplot=False, finalShow=False, outputName=tag + '_out.mat',
+                                            closePlots=True, pTag=tag, trueF=fVec, simpG=True)
     iterMUs.append(MUs)
     iterObj.append(obj)
+    iterTag.append(tag)
     iterRunTime.append(time.time() - start)
 
     # run explicit based on cg with simple objective
     # run explicit based on cg
     start = time.time()
-    obj, MUs = runerf(dat, ['unifmixed', 3], RTplot=False, finalShow=False, outputName='cgsimp_out.mat',
-                      closePlots=True, startVec=erfInputVec, pTag='cgsimp', trueFlu=fVec, plotSeed=True)
+    tag = 'CLO_DLO-U'
+    obj, MUs = runerf(dat, [tag, 3], RTplot=False, finalShow=False, outputName=tag + '_out.mat',
+                      closePlots=True, startVec=erfInputVec, pTag=tag, trueFlu=fVec, plotSeed=True)
     iterObj.append(obj)
     iterMUs.append(MUs)
+    iterTag.append(tag)
     iterRunTime.append(time.time() - start)
 
     params.addObjList(iterObj)
     params.addRuntimeList(iterRunTime)
     params.addMUList(iterMUs)
+    params.addTagList(iterTag)
 
     if len(params.obj) % printEveryThisManyIterations == 0:
         print 'Objective Function Values'
