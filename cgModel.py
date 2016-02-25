@@ -219,7 +219,7 @@ class cgSolver:
                               'numApprox': self.nApprox, 'sinScalar': self.sinScalar, 'sigma': self.sigma,
                               'alphas': self.alphas})
 
-    def printSolution(self, ongoingfig=False, intermediateY=None, finalShow = False):
+    def printSolution(self, ongoingfig=False, intermediateY=None, finalShow=False, fontsize=20):
         """Plots target and generated fluence as well as aperture fluences"""
 
         # plot main function
@@ -262,10 +262,12 @@ class cgSolver:
         else:
             if self.simpleG:
                 plt.title(
-                    'Method: DLO-U Seed, obj: ' + str(round(self.finalObjEval(), 5)) + ', K: ' + str(np.size(self.y)))
+                    'Method: DLO-U, obj: ' + str(round(self.finalObjEval(), 5)) + ', K: ' + str(np.size(self.y)),
+                    fontsize=20)
             else:
                 plt.title(
-                    'Method: DLO Seed, obj: ' + str(round(self.finalObjEval(), 5)) + ', K: ' + str(np.size(self.y)))
+                    'Method: DLO, obj: ' + str(round(self.finalObjEval(), 5)) + ', K: ' + str(np.size(self.y)),
+                    fontsize=20)
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
             plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')

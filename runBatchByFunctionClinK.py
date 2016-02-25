@@ -71,31 +71,30 @@ minAperEdgeGap = 0.
 
 
 # Generate data vectors - sum of erfs
-# outfilename = 'erfsout.mat'
-# directory = 'erfsClinK'
-# kParam = np.arange(10, 40 + 1, 10)
-# cParam = np.arange(0.0,1.+0.1, 0.5)
-# bParam = np.arange(0.0,1.+0.1, 0.5)
-# params = paramTesting()
-# params.addParam('nAper',kParam.tolist())
-# params.addParam('centerScalar',cParam.tolist())
-# params.addParam('widthScalar',bParam.tolist())
-# params.genCombination()
-# print kParam, cParam, bParam
-
-
-# Generate data vectors - random step
-# outfilename, order, directory = 'stepFunctionOutOrder0.mat', 0, 'stepOrder0ClinK'
-outfilename, order, directory = 'stepFunctionOutOrder2.mat', 2, 'stepOrder2ClinK'
+outfilename = 'erfsout.mat'
+directory = 'erfsClinK'
 kParam = np.arange(10, 40 + 1, 10)
-cParam = np.arange(10, 20 + 1, 5)
-bParam = np.arange(3., 6 + 1, 1)
+cParam = np.arange(0.0, 1. + 0.1, 0.5)
+bParam = np.arange(0.0, 1. + 0.1, 0.5)
 params = paramTesting()
-params.addParam('maxAper', kParam.tolist())
-params.addParam('numBins', cParam.tolist())
-params.addParam('minRange', bParam.tolist())
+params.addParam('nAper', kParam.tolist())
+params.addParam('centerScalar', cParam.tolist())
+params.addParam('widthScalar', bParam.tolist())
 params.genCombination()
 print kParam, cParam, bParam
+
+# Generate data vectors - random step
+# # outfilename, order, directory = 'stepFunctionOutOrder0.mat', 0, 'stepOrder0ClinK'
+# outfilename, order, directory = 'stepFunctionOutOrder2.mat', 2, 'stepOrder2ClinK'
+# kParam = np.arange(10, 40 + 1, 10)
+# cParam = np.arange(10, 20 + 1, 5)
+# bParam = np.arange(3., 6 + 1, 1)
+# params = paramTesting()
+# params.addParam('maxAper', kParam.tolist())
+# params.addParam('numBins', cParam.tolist())
+# params.addParam('minRange', bParam.tolist())
+# params.genCombination()
+# print kParam, cParam, bParam
 
 
 
@@ -127,11 +126,11 @@ for kInd, cInd, bInd in params.combination:
     fVec = fGetter.erfSumRand(kP, cP, bP, sigma, width)
 
     # random step
-    kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
-    runName = params.getFilename(kInd, cInd, bInd)
-    dat = dataObj([0, 0], res, kP, sigma, width, alphas, [minAperWidth, maxAperWidth, minAperEdgeGap], runName,
-                  directory)
-    fVec = fGetter.unitStep(cP, bP, 7., order=order)
+    # kP, cP, bP = params.getAndSaveParams(kInd, cInd, bInd)
+    # runName = params.getFilename(kInd, cInd, bInd)
+    # dat = dataObj([0, 0], res, kP, sigma, width, alphas, [minAperWidth, maxAperWidth, minAperEdgeGap], runName,
+    #               directory)
+    # fVec = fGetter.unitStep(cP, bP, 7., order=order)
 
  
 

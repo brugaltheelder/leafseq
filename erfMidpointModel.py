@@ -67,6 +67,7 @@ class erfMidModel:
             self.fTarget = np.array(np.sin(self.sinScalar * self.approxPoints) + self.sinGap)
 
 
+
         # initialize solution vector
         if startingSolutionVector is not None and len(self.varArray) == len(startingSolutionVector):
             self.varArray = np.copy(startingSolutionVector)
@@ -253,8 +254,7 @@ class erfMidModel:
         self.finalX = self.res['x']
         self.obj = self.res['fun']
 
-    
-    def plotSolution(self, ongoingfig=False, intermediateX=None, finalShow = False):
+    def plotSolution(self, ongoingfig=False, intermediateX=None, finalShow=False, fontsize=20):
         """Plotter (can handle a single ongoing plot (0) or the single final plot (1)). Plots target and generated fluence as well as aperture fluences"""
 
         # plot main function
@@ -313,9 +313,10 @@ class erfMidModel:
                 plt.savefig(self.directory + '/' + self.runTag + '_ERFiterPlotOut_' + str(self.figCounter) + '.png')
                 self.figCounter += 1
         else:
-            plt.title('Method: CLO, obj: ' + str(round(self.obj, 5)) + ', K: ' + str(self.K))
-            plt.xlabel('Position along MLC opening')
-            plt.ylabel('Fluence')
+            plt.title('Method: ' + self.plotTag + ', obj: ' + str(round(self.obj, 5)) + ', K: ' + str(self.K),
+                      fontsize=fontsize)
+            plt.xlabel('Position along MLC opening', fontsize=fontsize)
+            plt.ylabel('Fluence', fontsize=fontsize)
             plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
             if self.plotSeed:
                 for k in range(self.K):

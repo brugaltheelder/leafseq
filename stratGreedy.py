@@ -163,7 +163,7 @@ class stratGreedy(object):
         """Saves a MATLAB file with model outputs"""
         io.savemat(self.directory + '/' + self.runTag + '_' + filename, {'y': self.y, 'm': self.m,'a': self.a, 'obj': self.obj, 'K': self.obj, 'width': self.width, 'numApprox': self.M, 'alphas': self.alphas, 'sigma':self.sigma, 'K':self.y.shape[0]})
 
-    def plotStrat(self):
+    def plotStrat(self, fontsize=20):
         """Plots the initial Fluence, stratified fluence, and aperture fluences"""
 
         plt.plot(self.approxPoints, self.f, 'r', linestyle='dotted', zorder=2, linewidth=2)
@@ -181,10 +181,10 @@ class stratGreedy(object):
             g+= gHolder
         plt.plot(self.approxPoints, g, 'g', linestyle='solid')
         plt.title(
-            'Method: Trad Seed, obj: ' + str(round(self.getObj(g), 5)) + ', K: ' + str(self.y.shape[0]) + ', L: ' + str(
-                self.L))
-        plt.xlabel('Position along MLC opening')
-        plt.ylabel('Fluence')
+            'Method: Conv, obj: ' + str(round(self.getObj(g), 5)) + ', K: ' + str(self.y.shape[0]) + ', L: ' + str(
+                self.L), fontsize=fontsize)
+        plt.xlabel('Position along MLC opening', fontsize=fontsize)
+        plt.ylabel('Fluence', fontsize=fontsize)
         plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
 
         plt.show()
