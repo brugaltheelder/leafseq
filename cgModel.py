@@ -258,6 +258,7 @@ class cgSolver:
             plt.draw()
             if self.realTimePlotSaving:
                 plt.savefig(self.directory + '/' + 'CGiterPlotOut_' + str(self.figCounter) + '_.png')
+                plt.savefig(self.directory + '/' + 'CGiterPlotOut_' + str(self.figCounter) + '_.eps')
                 self.figCounter += 1
         else:
             if self.simpleG:
@@ -271,6 +272,7 @@ class cgSolver:
             plt.xlabel('Position along MLC opening')
             plt.ylabel('Fluence')
             plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
+            plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.eps')
             if finalShow:
                 plt.show()
             else:

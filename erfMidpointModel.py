@@ -311,6 +311,7 @@ class erfMidModel:
             plt.draw()
             if self.realTimePlotSaving:
                 plt.savefig(self.directory + '/' + self.runTag + '_ERFiterPlotOut_' + str(self.figCounter) + '.png')
+                plt.savefig(self.directory + '/' + self.runTag + '_ERFiterPlotOut_' + str(self.figCounter) + '.eps')
                 self.figCounter += 1
         else:
             plt.title('Method: ' + self.plotTag + ', obj: ' + str(round(self.obj, 5)) + ', K: ' + str(self.K),
@@ -318,6 +319,7 @@ class erfMidModel:
             plt.xlabel('Position along MLC opening', fontsize=fontsize)
             plt.ylabel('Fluence', fontsize=fontsize)
             plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
+            plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.eps')
             if self.plotSeed:
                 for k in range(self.K):
                 # plot left error function up to center
@@ -334,6 +336,7 @@ class erfMidModel:
                              'k', linestyle='dashed', zorder=3)
 
                 plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '_withSeed.png')
+                plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '_withSeed.eps')
 
             if finalShow:
                 plt.show()

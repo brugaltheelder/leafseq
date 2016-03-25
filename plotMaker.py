@@ -33,6 +33,7 @@ def getAllPlots(savefolder, basefolder, matname, targetType, headings, l1step):
     fig = plt.gcf()
     fig.set_size_inches(12, 8, forward=True)
     plt.savefig(savefolder + targetType.replace(' ', '_') + '_' + 'ObjRatioBoxPlot.png', bbox_inches='tight', dpi=400)
+    plt.savefig(savefolder + targetType.replace(' ', '_') + '_' + 'ObjRatioBoxPlot.eps', bbox_inches='tight', dpi=400)
     plt.show()
 
     # build runtimes dataframe
@@ -46,6 +47,7 @@ def getAllPlots(savefolder, basefolder, matname, targetType, headings, l1step):
     fig = plt.gcf()
     fig.set_size_inches(12, 8, forward=True)
     plt.savefig(savefolder + targetType.replace(' ', '_') + '_' + 'RunTimesPlot.png', bbox_inches='tight', dpi=400)
+    plt.savefig(savefolder + targetType.replace(' ', '_') + '_' + 'RunTimesPlot.eps', bbox_inches='tight', dpi=400)
     plt.show()
 
     # build MUs dataframe
@@ -63,6 +65,7 @@ def getAllPlots(savefolder, basefolder, matname, targetType, headings, l1step):
     fig = plt.gcf()
     fig.set_size_inches(12, 8, forward=True)
     plt.savefig(savefolder + targetType.replace(' ', '_') + '_' + 'MURatios.png', bbox_inches='tight', dpi=400)
+    plt.savefig(savefolder + targetType.replace(' ', '_') + '_' + 'MURatios.eps', bbox_inches='tight', dpi=400)
     plt.show()
 
     # set plot attributes for obj vs mu
@@ -102,6 +105,7 @@ def getAllPlots(savefolder, basefolder, matname, targetType, headings, l1step):
     fig.set_size_inches(5 * len(l1Fix), 3 * len(kFix), forward=True)
     plt.tight_layout(pad=0.3)
     plt.savefig(savefolder + targetType.replace(' ', '_') + '_' + 'ObjVsMU.png', bbox_inches='tight', dpi=400)
+    plt.savefig(savefolder + targetType.replace(' ', '_') + '_' + 'ObjVsMU.eps', bbox_inches='tight', dpi=400)
     plt.show()
 
 

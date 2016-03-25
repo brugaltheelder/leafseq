@@ -22,11 +22,13 @@ def applyPlotStyle():
 marker = itertools.cycle(('8', '+', '.', 'o', '*', 'v', '^', 'p', 's', 'D'))
 
 # run parameters
-makePlots = True
-makePlotsObjVsMUs = True
-outputExcel = True
+makePlots = False
+makePlotsObjVsMUs = False
+outputExcel = False
+makePlotsObjVsMUsSingle = False
+makePlotsImp = True
 excelOutFilename = 'outputNew.xlsx'
-savefolder = '/media/troy/DataDrive/Dropbox/PythonLS/leafseq/figsClinKnew/'
+savefolder = '/media/troy/DataDrive/Dropbox/PythonLS/leafseq/figsClinKnewEPS/'
 testRatioPosition = 13
 cutoff = 1e3
 
@@ -117,6 +119,7 @@ if makePlots:
     fig = plt.gcf()
     fig.set_size_inches(12, 8, forward=True)
     plt.savefig(savefolder + 'FullObjRatioBoxPlotSEED.png', bbox_inches='tight', dpi=400)
+    plt.savefig(savefolder + 'FullObjRatioBoxPlotSEED.eps', bbox_inches='tight', dpi=400)
     plt.show()
 
 # plot objs_scaled CLO
@@ -129,6 +132,7 @@ if makePlots:
     fig = plt.gcf()
     fig.set_size_inches(12, 8, forward=True)
     plt.savefig(savefolder + 'FullObjRatioBoxPlotCLO.png', bbox_inches='tight', dpi=400)
+    plt.savefig(savefolder + 'FullObjRatioBoxPlotCLO.eps', bbox_inches='tight', dpi=400)
     plt.show()
 
 # output latex table of stats
@@ -148,6 +152,7 @@ if makePlots:
     fig = plt.gcf()
     fig.set_size_inches(12, 8, forward=True)
     plt.savefig(savefolder + 'FullMURatiosCLO.png', bbox_inches='tight', dpi=400)
+    plt.savefig(savefolder + 'FullMURatiosCLO.eps', bbox_inches='tight', dpi=400)
     plt.show()
 
 # output latex table of stats
@@ -158,17 +163,20 @@ with open(savefolder + 'mus_scaled_df_stats_cleaned.txt', 'w') as f:
     f.write(mus_scaled_df[mus_scaled_df[:] < cutoff].describe().apply(pd.Series.round, args=(2,)).to_latex())
 
 # make objective function comparisons
-if makePlots:
+if makePlotsImp:
     # build percent improvement for DLO, DLO-U, Conv
     obj_imp = np.divide(F['objectives'][:, seedIndices], F['objectives'][:, cloIndices])
     obj_improvement_df = pd.DataFrame(obj_imp, columns=cloHeadings)
     print obj_improvement_df.median()
+    print '-------------------------'
+    print obj_improvement_df.describe()
+    obj_improvement_df.hist()
+    plt.savefig(savefolder + 'imphist.png', bbox_inches='tight', dpi=400)
+    plt.show()
     print objs_scaled_df[cloHeadings].median()
     objImpVsScaled = pd.concat([obj_improvement_df.median(), objs_scaled_df[cloHeadings].median()], axis=1)
     with open(savefolder + 'improvement table.txt', 'w') as f:
         f.write(objImpVsScaled.apply(pd.Series.round, args=(2,)).transpose().to_latex())
-
-    pass
 
 # make the obj vs mus plot
 if makePlotsObjVsMUs:
@@ -182,7 +190,7 @@ if makePlotsObjVsMUs:
     p3 = ['CLO_DLO-U', 'CLO_Rand ', 'CLO_Unif ']
     p4 = ['CLO_DLO-U', 'CLO_Cent ', 'CLO_Peak ']
     pblocks = [p1, p2, p3, p4]
-    positions = [221, 222, 223, 224];
+    positions = [221, 222, 223, 224]
     for p in range(len(pblocks)):
         plt.subplot(positions[p])
         applyPlotStyle()
@@ -195,6 +203,31 @@ if makePlotsObjVsMUs:
 
     plt.tight_layout()
     plt.savefig(savefolder + 'ObjVsMus.png', bbox_inches='tight', dpi=400)
+    plt.savefig(savefolder + 'ObjVsMus.eps', bbox_inches='tight', dpi=400)
+    plt.show()
+
+# make the obj vs mus plot
+if makePlotsObjVsMUsSingle:
+    fig = plt.figure()
+    fig.set_size_inches(4, 3, forward=True)
+    ax = plt.gca()
+    p1 = ['CLO_DLO-U', 'Conv     ', 'DLO      ', 'DLO-U    ']
+
+    pblocks = [p1]
+    positions = [111]
+    for p in range(len(pblocks)):
+        plt.subplot(positions[p])
+        applyPlotStyle()
+        colors = itertools.cycle(('r', 'c', 'darkblue', 'maroon', 'black', 'gray', 'g', 'peru'))
+        marker = itertools.cycle(('D', '8', '+', '.', 'o', '*', 'v', '^', 'p', 's'))
+        for c in pblocks[p]:
+            plt.scatter(objs_scaled_df[c], mus_scaled_df[c], marker=marker.next(), color=colors.next(), alpha=0.35,
+                        label=c, zorder=1 if c == 'CLO_DLO-U' else 0)
+        plt.legend(markerscale=0.9, fontsize=12, fancybox=True, framealpha=0.7, loc='upper left')
+
+    plt.tight_layout()
+    plt.savefig(savefolder + 'ObjVsMusSingle.png', bbox_inches='tight', dpi=400)
+    plt.savefig(savefolder + 'ObjVsMusSingle.eps', bbox_inches='tight', dpi=400)
     plt.show()
 
 if outputExcel:

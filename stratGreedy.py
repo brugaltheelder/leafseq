@@ -186,6 +186,7 @@ class stratGreedy(object):
         plt.xlabel('Position along MLC opening', fontsize=fontsize)
         plt.ylabel('Fluence', fontsize=fontsize)
         plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.png')
+        plt.savefig(self.directory + '/' + self.runTag + '_' + self.plotTag + '.eps')
 
         plt.show()
         
